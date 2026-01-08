@@ -1,0 +1,459 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   EMPATH LAYER - ARTISTIC EMOTION-AWARE DESIGN
+   Complete Redesign with Organic Color Palette
+   ============================================ */
+
+:root {
+  /* Typography - Artistic & Organic */
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.65;
+  font-weight: 400;
+
+  /* Color Scheme - Light, Artistic, Warm */
+  color-scheme: light;
+
+  /* STRICT 5-COLOR PALETTE - NO OTHER COLORS ALLOWED */
+  --olive: #bbbe64;           /* Olive/Lime Yellow - Energy & warmth */
+  --mauve: #8e5572;           /* Dusty Mauve/Plum - Empathy & depth */
+  --mint: #f2f7f2;            /* Very Light Mint - Breathable canvas */
+  --beige: #bcaa99;           /* Warm Beige/Tan - Natural grounding */
+  --eggplant: #443850;        /* Deep Purple - Text & depth (replaces black) */
+
+  /* Background Colors */
+  --bg-base: #f2f7f2;
+  --bg-elevated: #ffffff;
+  --bg-card: rgba(188, 170, 153, 0.15);
+  --bg-hover: rgba(187, 190, 100, 0.12);
+  --bg-soft: rgba(142, 85, 114, 0.08);
+
+  /* Primary Colors - Using Mauve */
+  --primary: #8e5572;
+  --primary-hover: #7d4a63;
+  --primary-light: rgba(142, 85, 114, 0.2);
+
+  /* Secondary Colors */
+  --secondary: #8e5572;
+  --secondary-hover: #7d4a63;
+  --secondary-light: rgba(142, 85, 114, 0.2);
+
+  /* Status Colors (Using palette only) */
+  --success: #8e5572;
+  --warning: #bcaa99;
+  --danger: #443850;
+  --info: #8e5572;
+
+  /* Text Colors - All use eggplant (no black!) */
+  --text-primary: #443850;
+  --text-secondary: rgba(68, 56, 80, 0.75);
+  --text-tertiary: rgba(68, 56, 80, 0.55);
+  --text-disabled: rgba(68, 56, 80, 0.35);
+  --text-on-primary: #ffffff;
+  --text-on-mauve: #f2f7f2;
+
+  /* Border Colors - Soft, organic */
+  --border: rgba(68, 56, 80, 0.12);
+  --border-medium: rgba(68, 56, 80, 0.2);
+  --border-focus: var(--primary);
+
+  /* Emotion Colors (Mapped to palette) - Higher contrast */
+  --emotion-happy: #8e5572;
+  --emotion-sad: #443850;
+  --emotion-neutral: #bcaa99;
+  --emotion-surprise: #8e5572;
+
+  /* Spacing Scale (8px base) */
+  --space-1: 0.5rem;   /* 8px */
+  --space-2: 1rem;     /* 16px */
+  --space-3: 1.5rem;   /* 24px */
+  --space-4: 2rem;     /* 32px */
+  --space-6: 3rem;     /* 48px */
+  --space-8: 4rem;     /* 64px */
+  --space-12: 6rem;    /* 96px */
+
+  /* Border Radius - Organic, soft curves */
+  --radius-sm: 0.75rem;   /* 12px */
+  --radius-md: 1rem;      /* 16px */
+  --radius-lg: 1.5rem;    /* 24px */
+  --radius-xl: 2rem;      /* 32px */
+  --radius-2xl: 3rem;     /* 48px */
+  --radius-full: 9999px;
+
+  /* Shadows - Soft, organic using palette colors (NO BLACK) */
+  --shadow-sm: 0 2px 8px 0 rgba(68, 56, 80, 0.08);
+  --shadow-md: 0 6px 20px -2px rgba(68, 56, 80, 0.12);
+  --shadow-lg: 0 12px 32px -4px rgba(68, 56, 80, 0.15);
+  --shadow-xl: 0 20px 48px -8px rgba(68, 56, 80, 0.18);
+  --shadow-glow-olive: 0 0 40px rgba(187, 190, 100, 0.3), 0 0 80px rgba(187, 190, 100, 0.15);
+  --shadow-glow-mauve: 0 0 40px rgba(142, 85, 114, 0.3), 0 0 80px rgba(142, 85, 114, 0.15);
+
+  /* Animation Timing - Organic, natural feeling */
+  --transition-fast: 200ms;
+  --transition-normal: 350ms;
+  --transition-slow: 500ms;
+
+  /* Typography Scale - Modest & readable */
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+  --text-5xl: 3rem;       /* 48px */
+
+  /* Rendering */
+  color: var(--text-primary);
+  background-color: var(--bg-base);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  /* Artistic organic background using ONLY palette colors */
+  background:
+    radial-gradient(circle at 15% 30%, rgba(142, 85, 114, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 70%, rgba(188, 170, 153, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(142, 85, 114, 0.06) 0%, transparent 40%),
+    #f2f7f2;
+  background-attachment: fixed;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: var(--text-5xl); font-weight: 700; }
+h2 { font-size: var(--text-4xl); font-weight: 600; }
+h3 { font-size: var(--text-3xl); font-weight: 600; }
+h4 { font-size: var(--text-2xl); font-weight: 500; }
+h5 { font-size: var(--text-xl); font-weight: 500; }
+h6 { font-size: var(--text-lg); font-weight: 500; }
+
+p {
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.01em;
+}
+
+.font-display {
+  font-family: 'Fraunces', serif;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR - Organic & Artistic
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(188, 170, 153, 0.12);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(142, 85, 114, 0.3);
+  border-radius: var(--radius-sm);
+  border: 2px solid rgba(188, 170, 153, 0.12);
+  transition: background var(--transition-normal) ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(142, 85, 114, 0.5);
+}
+
+/* ============================================
+   ANIMATIONS - Organic & Natural
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes gentle-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--transition-slow) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--transition-slow) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft var(--transition-slow) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-gentle-float {
+  animation: gentle-float 3s ease-in-out infinite;
+}
+
+/* ============================================
+   FOCUS STYLES - Accessible & Beautiful
+   ============================================ */
+
+*:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================
+   BUTTON BASE STYLES
+   ============================================ */
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-normal) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* ============================================
+   GLASS MORPHISM EFFECT - Organic
+   ============================================ */
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(68, 56, 80, 0.1);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   GRADIENT ACCENTS - Palette Only
+   ============================================ */
+
+.gradient-primary {
+  background: linear-gradient(135deg, var(--mauve) 0%, var(--eggplant) 100%);
+}
+
+.gradient-warm {
+  background: linear-gradient(135deg, var(--beige) 0%, var(--mauve) 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--mauve) 0%, var(--eggplant) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   EMOTION GLOW UTILITIES - Using Palette
+   ============================================ */
+
+.emotion-glow-happy {
+  box-shadow: 0 0 50px rgba(142, 85, 114, 0.5), 0 0 90px rgba(142, 85, 114, 0.3);
+}
+
+.emotion-glow-sad {
+  box-shadow: 0 0 50px rgba(68, 56, 80, 0.5), 0 0 90px rgba(68, 56, 80, 0.3);
+}
+
+.emotion-glow-neutral {
+  box-shadow: 0 0 50px rgba(188, 170, 153, 0.5), 0 0 90px rgba(188, 170, 153, 0.3);
+}
+
+.emotion-glow-surprise {
+  box-shadow: 0 0 50px rgba(142, 85, 114, 0.6), 0 0 90px rgba(142, 85, 114, 0.35);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.transition-smooth {
+  transition: all var(--transition-normal) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ============================================
+   ARTISTIC ENHANCEMENTS - Organic Design
+   ============================================ */
+
+/* Artistic gradient overlays using palette */
+.artistic-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.artistic-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(187, 190, 100, 0.08) 0%, transparent 35%),
+    radial-gradient(circle at 88% 82%, rgba(142, 85, 114, 0.06) 0%, transparent 35%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Artistic card styling - warm & organic */
+.artistic-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.8) 0%, rgba(242, 247, 242, 0.9) 100%);
+  border: 1.5px solid rgba(68, 56, 80, 0.1);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Organic texture overlay */
+.organic-texture {
+  position: relative;
+}
+
+.organic-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(68, 56, 80, 0.01) 2px, rgba(68, 56, 80, 0.01) 4px);
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  * {
+    background: var(--mint) !important;
+    color: var(--eggplant) !important;
+  }
+}

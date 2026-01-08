@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Emotion-aware AI assistant with real-time facial emotion detection and empathetic responses" />
+    <meta name="theme-color" content="#f2f7f2" />
+
+    <!-- Google Fonts - ARTISTIC REDESIGN -->
+    <!-- Using Fraunces (Soft Serif), DM Sans (Humanist Sans), and JetBrains Mono -->
+    <!-- These fonts are imported in index.css with proper preconnect -->
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <title>Empath Layer - Emotion-Aware AI Assistant</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Initialize Lucide icons after DOM load
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    </script>
+  </body>
+</html>
