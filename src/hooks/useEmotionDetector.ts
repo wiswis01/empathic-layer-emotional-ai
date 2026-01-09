@@ -474,13 +474,12 @@ export function useEmotionDetector(
       inputTensor.dispose();
       prediction.dispose();
 
-      // Process results
-      // Model output order: happy, neutral, sad, surprise (indices 0, 1, 2, 3)
+      // Process results - Model output order: happy, sad, surprise, neutral
       const scores: EmotionScores = {
         happy: probabilities[0],
-        neutral: probabilities[1],
-        sad: probabilities[2],
-        surprise: probabilities[3],
+        sad: probabilities[1],
+        surprise: probabilities[2],
+        neutral: probabilities[3],
       };
 
       // Find dominant emotion
@@ -507,9 +506,9 @@ export function useEmotionDetector(
       if (fullConfig.debug) {
         console.log('[EmotionDetector] RAW SCORES:', {
           happy: probabilities[0].toFixed(3),
-          neutral: probabilities[1].toFixed(3),
-          sad: probabilities[2].toFixed(3),
-          surprise: probabilities[3].toFixed(3),
+          sad: probabilities[1].toFixed(3),
+          surprise: probabilities[2].toFixed(3),
+          neutral: probabilities[3].toFixed(3),
           dominant: dominantEmotion,
           confidence: maxScore.toFixed(3),
           latency: inferenceTime.toFixed(2) + 'ms',
