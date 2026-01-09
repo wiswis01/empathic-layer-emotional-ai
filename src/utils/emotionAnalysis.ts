@@ -51,12 +51,12 @@ export function getDominantEmotion(scores: EmotionScores): {
 }
 
 /**
- * Apply exponential moving average smoothing to emotion history
- * This prevents rapid fluctuations and provides more stable readings
+ * Apply fast smoothing to emotion history (optimized for <50ms latency)
+ * Uses minimal smoothing for instant response while preventing jitter
  */
 export function smoothEmotionScores(
   history: EmotionDetectionResult[],
-  alpha: number = 0.3
+  alpha: number = 1.0  // 1.0 = no smoothing, use latest directly
 ): EmotionScores {
   if (history.length === 0) {
     return {
@@ -67,20 +67,21 @@ export function smoothEmotionScores(
     };
   }
 
-  if (history.length === 1) {
-    return history[0].scores;
+  // For minimal history (1-2 items), return latest immediately for speed
+  if (history.length <= 2) {
+    return history[history.length - 1].scores;
   }
 
-  // Apply EMA from oldest to newest
-  const smoothed = { ...history[0].scores };
-  for (let i = 1; i < history.length; i++) {
-    const current = history[i].scores;
-    for (const emotion of Object.keys(smoothed) as EmotionLabel[]) {
-      smoothed[emotion] = alpha * current[emotion] + (1 - alpha) * smoothed[emotion];
-    }
-  }
-
-  return smoothed;
+  // Fast weighted average: 70% latest, 30% previous (light smoothing)
+  const latest = history[history.length - 1].scores;
+  const previous = history[history.length - 2].scores;
+  
+  return {
+    happy: 0.7 * latest.happy + 0.3 * previous.happy,
+    sad: 0.7 * latest.sad + 0.3 * previous.sad,
+    surprise: 0.7 * latest.surprise + 0.3 * previous.surprise,
+    neutral: 0.7 * latest.neutral + 0.3 * previous.neutral,
+  };
 }
 
 /**
@@ -110,24 +111,19 @@ export function calculateEmotionalDimensions(scores: EmotionScores): {
 }
 
 /**
- * Determine if the emotional state is stable based on history
- * Stability is determined by consistency of dominant emotion
+ * Determine if the emotional state is stable (optimized for speed)
+ * Simplified check for minimal latency
  */
 export function isEmotionStable(
   history: EmotionDetectionResult[],
-  threshold: number = 0.6
+  threshold: number = 0.5  // Lower threshold for faster detection
 ): boolean {
-  if (history.length < 3) return false;
+  if (history.length < 2) return false;
 
-  const recentEmotions = history.slice(-5).map((r) => r.dominantEmotion);
-  const emotionCounts = new Map<EmotionLabel, number>();
-
-  for (const emotion of recentEmotions) {
-    emotionCounts.set(emotion, (emotionCounts.get(emotion) || 0) + 1);
-  }
-
-  const maxCount = Math.max(...emotionCounts.values());
-  return maxCount / recentEmotions.length >= threshold;
+  // Fast check: if last two emotions match, consider stable
+  const last = history[history.length - 1].dominantEmotion;
+  const prev = history[history.length - 2].dominantEmotion;
+  return last === prev;
 }
 
 /**

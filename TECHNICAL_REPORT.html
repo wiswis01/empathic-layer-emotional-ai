@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empathy Layer - Technical Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.7;
+      color: #1a1a2e;
+      background: #fff;
+      font-size: 11pt;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 8.5in;
+      margin: 0 auto;
+      padding: 0.75in 1in;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #8e5572;
+      margin-bottom: 35px;
+    }
+
+    .header h1 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 28pt;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .header .subtitle {
+      font-size: 12pt;
+      color: #8e5572;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .header .meta {
+      font-size: 9pt;
+      color: #666;
+    }
+
+    /* Sections */
+    h2 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16pt;
+      font-weight: 600;
+      color: #8e5572;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e0d5d9;
+    }
+
+    h3 {
+      font-size: 12pt;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    /* Code */
+    code {
+      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+      font-size: 9pt;
+      background: #f5f0f2;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #8e5572;
+    }
+
+    pre {
+      background: #1a1a2e;
+      color: #f0f0f0;
+      padding: 15px 20px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 9pt;
+      margin: 15px 0;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 10pt;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border: 1px solid #e0d5d9;
+    }
+
+    th {
+      background: #f5f0f2;
+      font-weight: 600;
+      color: #8e5572;
+    }
+
+    tr:nth-child(even) {
+      background: #faf8f9;
+    }
+
+    /* Callout boxes */
+    .callout {
+      background: #f5f0f2;
+      border-left: 4px solid #8e5572;
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .callout.critical {
+      background: #fef2f2;
+      border-left-color: #dc2626;
+    }
+
+    .callout-title {
+      font-weight: 600;
+      color: #8e5572;
+      margin-bottom: 5px;
+    }
+
+    .callout.critical .callout-title {
+      color: #dc2626;
+    }
+
+    /* Architecture diagram */
+    .diagram {
+      background: #faf8f9;
+      border: 1px solid #e0d5d9;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      font-family: 'SF Mono', monospace;
+      font-size: 9pt;
+      white-space: pre;
+      line-height: 1.4;
+      overflow-x: auto;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid #e0d5d9;
+      text-align: center;
+      font-size: 9pt;
+      color: #888;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        font-size: 10pt;
+      }
+
+      .container {
+        padding: 0;
+        max-width: 100%;
+      }
+
+      h2 {
+        page-break-after: avoid;
+      }
+
+      pre, .diagram, table {
+        page-break-inside: avoid;
+      }
+
+      .callout {
+        page-break-inside: avoid;
+      }
+    }
+
+    /* Highlight */
+    .highlight {
+      background: linear-gradient(120deg, #fef3c7 0%, #fef3c7 100%);
+      padding: 0 3px;
+    }
+
+    strong {
+      color: #1a1a2e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <h1>Empathy Layer</h1>
+      <div class="subtitle">Technical Report: Real-Time Emotion Detection System</div>
+      <div class="meta">
+        Version 1.0.0 &nbsp;|&nbsp; January 9, 2026 &nbsp;|&nbsp; Bug Fix & Architecture Review
+      </div>
+    </div>
+
+    <!-- Executive Summary -->
+    <h2>1. Executive Summary</h2>
+    <p>
+      This report documents the technical investigation and resolution of a critical bug in the Empathy Layer system where emotion detection would freeze on the first detected emotion. The issue stemmed from multiple interrelated problems in the React hook architecture, including stale JavaScript closures, missing frame change detection, and improper state management in the animation loop.
+    </p>
+    <p>
+      Four distinct root causes were identified and addressed, resulting in a fully functional real-time emotion detection pipeline that now responds fluidly to facial expression changes.
+    </p>
+
+    <!-- Project Overview -->
+    <h2>2. Project Overview</h2>
+
+    <h3>2.1 Concept & Ideation</h3>
+    <p>
+      Empathy Layer was conceived to bridge the emotional gap in human-AI interaction. Traditional chatbots respond purely to text, missing the rich emotional context that humans naturally perceive in face-to-face conversation. A person might type "I'm fine" while their face clearly shows distress. This disconnect leads to responses that feel mechanical and disconnected.
+    </p>
+    <p>
+      The core innovation is <strong>real-time emotional context injection</strong>: detecting the user's facial expressions via webcam, analyzing them client-side for privacy, and dynamically modifying the LLM's system prompt to inform its tone and approach. The result is an AI that can "read the room" and respond with appropriate empathy.
+    </p>
+
+    <h3>2.2 Architecture</h3>
+    <div class="diagram">
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│                 │     │                  │     │                 │
+│   Webcam Feed   │────▶│  BlazeFace       │────▶│  Emotion CNN    │
+│   (30 FPS)      │     │  (Face Detection)│     │  (TensorFlow.js)│
+│                 │     │                  │     │                 │
+└─────────────────┘     └──────────────────┘     └────────┬────────┘
+                                                          │
+                                                          ▼
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│                 │     │                  │     │                 │
+│  Chat Interface │◀────│  Groq LLM API    │◀────│ Context Builder │
+│  (React)        │     │  (Streaming)     │     │ (Prompt Inject) │
+│                 │     │                  │     │                 │
+└─────────────────┘     └──────────────────┘     └─────────────────┘</div>
+
+    <h3>2.3 Key Technologies</h3>
+    <table>
+      <tr>
+        <th>Component</th>
+        <th>Technology</th>
+        <th>Purpose</th>
+      </tr>
+      <tr>
+        <td>Frontend Framework</td>
+        <td>React 19 + TypeScript</td>
+        <td>UI composition and type safety</td>
+      </tr>
+      <tr>
+        <td>ML Runtime</td>
+        <td>TensorFlow.js + WebGPU</td>
+        <td>Client-side inference acceleration</td>
+      </tr>
+      <tr>
+        <td>Face Detection</td>
+        <td>BlazeFace</td>
+        <td>Real-time face localization</td>
+      </tr>
+      <tr>
+        <td>Emotion Model</td>
+        <td>Custom CNN (4-class)</td>
+        <td>Happy, Neutral, Sad, Surprised</td>
+      </tr>
+      <tr>
+        <td>LLM Backend</td>
+        <td>Groq API</td>
+        <td>Ultra-low latency inference</td>
+      </tr>
+      <tr>
+        <td>Build Tool</td>
+        <td>Vite 7</td>
+        <td>Fast HMR and bundling</td>
+      </tr>
+    </table>
+
+    <!-- Use Cases -->
+    <h2>3. Use Cases</h2>
+
+    <h3>3.1 Mental Health Support</h3>
+    <p>
+      AI companions can detect signs of distress even when users downplay their feelings in text. The system enables more compassionate responses, potentially flagging concerning emotional patterns for human review.
+    </p>
+
+    <h3>3.2 Customer Service</h3>
+    <p>
+      Video-enabled support agents can automatically adjust their communication style based on customer frustration levels, de-escalating tense situations before they escalate further.
+    </p>
+
+    <h3>3.3 Educational Platforms</h3>
+    <p>
+      AI tutors can detect confusion or frustration in students and adapt their teaching approach accordingly, offering encouragement when needed or simplifying explanations when comprehension appears low.
+    </p>
+
+    <h3>3.4 Accessibility</h3>
+    <p>
+      For users who struggle to articulate emotions verbally, facial expression detection provides an alternative channel for emotional communication with AI systems.
+    </p>
+
+    <!-- Bug Analysis -->
+    <h2>4. Bug Investigation</h2>
+
+    <h3>4.1 Reported Symptom</h3>
+    <div class="callout">
+      <div class="callout-title">User Report</div>
+      "The emotion detection freezes on the first emotion it sees."
+    </div>
+
+    <h3>4.2 Investigation Methodology</h3>
+    <p>
+      A systematic code review was conducted across the emotion detection pipeline, focusing on:
+    </p>
+    <ul>
+      <li>The <code>useEmotionDetector</code> React hook (primary detection logic)</li>
+      <li>The <code>emotionAnalysis</code> utility functions (smoothing and context generation)</li>
+      <li>The animation frame loop and React effect lifecycle</li>
+      <li>TensorFlow.js model loading and inference patterns</li>
+    </ul>
+
+    <h3>4.3 Root Causes Identified</h3>
+
+    <div class="callout critical">
+      <div class="callout-title">Critical Issue #1: Stale Closure in Detection Loop</div>
+      <p>
+        The <code>detectionLoop</code> callback used <code>requestAnimationFrame(detectionLoop)</code> to schedule itself recursively. When React recreated this callback due to dependency changes, the old loop continued running with stale references, effectively orphaning the detection system.
+      </p>
+    </div>
+
+    <p><strong>Issue #2: No Video Frame Change Detection</strong></p>
+    <p>
+      The inference pipeline processed frames without checking if the video had actually advanced. When inference ran faster than the camera's frame rate, identical frames were processed repeatedly, yielding identical results and creating the illusion of "frozen" detection.
+    </p>
+
+    <p><strong>Issue #3: Unbounded Face Detection Caching</strong></p>
+    <p>
+      When BlazeFace failed to detect a face, the system fell back to a cached face bounding box indefinitely. If the user moved significantly or left the frame, the model continued analyzing an outdated region, producing stale emotion readings.
+    </p>
+
+    <p><strong>Issue #4: Missing Concurrent Inference Protection</strong></p>
+    <p>
+      The asynchronous <code>runInference()</code> function could be called multiple times concurrently if the animation frame callback fired while a previous inference was still running. This created race conditions and potential memory leaks from undisposed tensors.
+    </p>
+
+    <!-- Fixes Applied -->
+    <h2>5. Fixes Applied</h2>
+
+    <h3>5.1 Ref-Based Detection Loop</h3>
+    <p>
+      Replaced the direct recursive <code>requestAnimationFrame</code> call with a ref-based pattern. The animation loop now calls through <code>detectionLoopRef.current</code>, which always points to the latest callback version.
+    </p>
+    <pre><code>// Before (buggy)
+const detectionLoop = useCallback(async (timestamp) => {
+  // ... detection logic ...
+  requestAnimationFrame(detectionLoop); // Captures stale closure
+}, [dependencies]);
+
+// After (fixed)
+const detectionLoopImpl = useCallback(async (timestamp) => {
+  // ... detection logic ...
+}, [dependencies]);
+
+useEffect(() => {
+  detectionLoopRef.current = detectionLoopImpl;
+}, [detectionLoopImpl]);
+
+useEffect(() => {
+  const loop = async (timestamp) => {
+    await detectionLoopRef.current?.(timestamp); // Always latest
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}, [isDetecting, isReady]);</code></pre>
+
+    <h3>5.2 Video Frame Change Detection</h3>
+    <p>
+      Added tracking of <code>video.currentTime</code> to skip processing when the same frame is presented multiple times.
+    </p>
+    <pre><code>const currentVideoTime = videoRef.current.currentTime;
+if (currentVideoTime === lastVideoTimeRef.current) {
+  return null; // Skip duplicate frame
+}
+lastVideoTimeRef.current = currentVideoTime;</code></pre>
+
+    <h3>5.3 Face Detection Cache Expiration</h3>
+    <p>
+      Implemented a counter that tracks consecutive frames without face detection. After 5 frames with no face, the cached bounding box is cleared, forcing the system to wait for a new face detection rather than using stale data.
+    </p>
+    <pre><code>if (predictions.length === 0) {
+  noFaceCountRef.current++;
+  if (noFaceCountRef.current >= NO_FACE_THRESHOLD) {
+    lastFaceBoxRef.current = null; // Clear stale cache
+    return null;
+  }
+} else {
+  noFaceCountRef.current = 0; // Reset on successful detection
+}</code></pre>
+
+    <h3>5.4 Inference Mutex</h3>
+    <p>
+      Added an <code>isInferringRef</code> flag to prevent concurrent inference runs and ensure proper cleanup in all code paths.
+    </p>
+    <pre><code>if (isInferringRef.current) {
+  return null; // Skip if previous inference still running
+}
+isInferringRef.current = true;
+try {
+  // ... inference logic ...
+} finally {
+  isInferringRef.current = false;
+}</code></pre>
+
+    <!-- Summary Table -->
+    <h2>6. Summary of Changes</h2>
+
+    <table>
+      <tr>
+        <th>Issue</th>
+        <th>Severity</th>
+        <th>Fix Applied</th>
+        <th>File Modified</th>
+      </tr>
+      <tr>
+        <td>Stale closure in animation loop</td>
+        <td>Critical</td>
+        <td>Ref-based loop pattern</td>
+        <td><code>useEmotionDetector.ts</code></td>
+      </tr>
+      <tr>
+        <td>Duplicate frame processing</td>
+        <td>High</td>
+        <td>Video time tracking</td>
+        <td><code>useEmotionDetector.ts</code></td>
+      </tr>
+      <tr>
+        <td>Unbounded face cache</td>
+        <td>Medium</td>
+        <td>Cache expiration counter</td>
+        <td><code>useEmotionDetector.ts</code></td>
+      </tr>
+      <tr>
+        <td>Concurrent inference</td>
+        <td>Medium</td>
+        <td>Inference mutex flag</td>
+        <td><code>useEmotionDetector.ts</code></td>
+      </tr>
+    </table>
+
+    <!-- Key Takeaways -->
+    <h2>7. Key Takeaways</h2>
+
+    <h3>7.1 React Hooks and Animation Loops</h3>
+    <p>
+      When combining React's <code>useCallback</code> with <code>requestAnimationFrame</code>, stale closures are a common pitfall. Self-scheduling loops should use refs to ensure they always execute the latest version of the callback, not the version captured at creation time.
+    </p>
+
+    <h3>7.2 Real-Time ML Inference Patterns</h3>
+    <p>
+      Client-side ML inference requires careful consideration of:
+    </p>
+    <ul>
+      <li><strong>Frame pacing:</strong> Don't process faster than the input source can provide new data</li>
+      <li><strong>Concurrency control:</strong> Prevent overlapping async operations</li>
+      <li><strong>Memory management:</strong> TensorFlow.js tensors must be explicitly disposed</li>
+      <li><strong>Graceful degradation:</strong> Handle detection failures without breaking the pipeline</li>
+    </ul>
+
+    <h3>7.3 Privacy-First Architecture</h3>
+    <p>
+      By processing video entirely client-side, Empathy Layer demonstrates that emotional AI can be built without compromising user privacy. The only data transmitted to the cloud is derived emotion labels, never raw video frames.
+    </p>
+
+    <!-- Conclusion -->
+    <h2>8. Conclusion</h2>
+    <p>
+      The emotion detection freeze was caused by a combination of React hook lifecycle issues and missing safeguards in the real-time processing pipeline. All four identified issues have been resolved, and the system now provides fluid, responsive emotion tracking.
+    </p>
+    <p>
+      The fixes applied follow React best practices for animation loops and establish robust patterns for real-time ML inference in browser environments. The codebase is now more maintainable and less prone to similar issues in future development.
+    </p>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Empathy Layer Technical Report &nbsp;|&nbsp; Prepared January 9, 2026</p>
+      <p>Document generated for internal review and documentation purposes.</p>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -159,8 +159,8 @@ export const EMOTION_EMOJIS: Record<EmotionLabel, string> = {
  * Default configuration for emotion detection
  */
 export const DEFAULT_DETECTOR_CONFIG: EmotionDetectorConfig = {
-  inferenceInterval: 150,
-  historySize: 5,
+  inferenceInterval: 100,
+  historySize: 2,
   minConfidence: 0.3,
   preferWebGPU: true,
   inputSize: 48,

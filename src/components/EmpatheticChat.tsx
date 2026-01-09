@@ -53,10 +53,10 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
     stopDetection,
     setContextActive,
   } = useEmotionDetector({
-    inferenceInterval: 150,
-    historySize: 5,
+    inferenceInterval: 30,  // Ultra-fast - 33 FPS for <50ms latency
+    historySize: 1,          // Minimal history for instant response
     preferWebGPU: true,
-    debug: false,
+    debug: false,            // Disable debug for production performance
   });
 
   /**

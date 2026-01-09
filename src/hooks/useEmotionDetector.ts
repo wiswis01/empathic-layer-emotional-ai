@@ -9,10 +9,12 @@
  * - Throttled inference to maintain <300ms latency target
  * - Emotion smoothing for stable readings
  * - Performance metrics tracking
+ * - Video frame change detection to prevent stale emotion readings
  */
 
 import { useRef, useState, useCallback, useEffect } from 'react';
 import * as tf from '@tensorflow/tfjs';
+import * as blazeface from '@tensorflow-models/blazeface';
 import type {
   EmotionLabel,
   EmotionScores,
@@ -22,6 +24,11 @@ import type {
   EmotionDetectorConfig,
 } from '@/types/emotion';
 import { createEmotionContext } from '@/utils/emotionAnalysis';
+
+/** How many consecutive frames with no face before clearing the cached face box */
+const NO_FACE_THRESHOLD = 5;
+/** How many frames to cache face detection (reduces overhead) */
+const FACE_DETECTION_CACHE_FRAMES = 3; // Only re-detect face every 3 frames
 
 interface UseEmotionDetectorReturn {
   /** Whether the model is loaded and ready */
@@ -148,10 +155,10 @@ async function createEmotionModel(): Promise<tf.LayersModel> {
 export function useEmotionDetector(
   config: Partial<EmotionDetectorConfig> = {}
 ): UseEmotionDetectorReturn {
-  // Merge config with defaults
+  // Merge config with defaults - optimized for <50ms latency
   const fullConfig: EmotionDetectorConfig = {
-    inferenceInterval: config.inferenceInterval ?? 150,
-    historySize: config.historySize ?? 5,
+    inferenceInterval: config.inferenceInterval ?? 30, // 30ms = ~33 FPS for ultra-fast updates
+    historySize: config.historySize ?? 1, // Minimal history for instant response
     minConfidence: config.minConfidence ?? 0.3,
     preferWebGPU: config.preferWebGPU ?? true,
     inputSize: config.inputSize ?? 48,
@@ -177,6 +184,7 @@ export function useEmotionDetector(
 
   // Refs
   const modelRef = useRef<tf.LayersModel | null>(null);
+  const faceModelRef = useRef<blazeface.BlazeFaceModel | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const historyRef = useRef<EmotionDetectionResult[]>([]);
@@ -203,11 +211,18 @@ export function useEmotionDetector(
 
         if (!isMounted) return;
 
+        // Load face detection model
+        console.log('[EmotionDetector] Loading face detection model...');
+        faceModelRef.current = await blazeface.load();
+        console.log('[EmotionDetector] Face detection model loaded');
+
+        if (!isMounted) return;
+
         // Try to load pre-trained model, fall back to creating one
         try {
           // In production, load from: /models/emotion_model/model.json
           modelRef.current = await tf.loadLayersModel('/models/emotion_model/model.json');
-          console.log('[EmotionDetector] Pre-trained model loaded');
+          console.log('[EmotionDetector] Pre-trained emotion model loaded');
         } catch {
           console.log('[EmotionDetector] No pre-trained model found, creating new model');
           modelRef.current = await createEmotionModel();
@@ -243,30 +258,150 @@ export function useEmotionDetector(
     };
   }, [fullConfig.preferWebGPU]);
 
+  // Canvas for faster preprocessing
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  // Debug canvas to show what model sees
+  const debugCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Last detected face box for smoothing
+  const lastFaceBoxRef = useRef<{x: number, y: number, width: number, height: number} | null>(null);
+  // Counter for consecutive frames with no face detected
+  const noFaceCountRef = useRef<number>(0);
+  // Track video frame changes to avoid processing same frame
+  const lastVideoTimeRef = useRef<number>(-1);
+  // Flag to prevent concurrent inference runs
+  const isInferringRef = useRef<boolean>(false);
+  // Ref to hold the latest detection loop to avoid stale closures
+  const detectionLoopRef = useRef<((timestamp: number) => void) | null>(null);
+  // Cache face detection results to reduce overhead
+  const faceDetectionFrameCountRef = useRef<number>(0);
+
   /**
-   * Preprocess video frame for emotion detection
+   * Preprocess video frame with face detection (optimized for speed)
    */
   const preprocessFrame = useCallback(
-    (video: HTMLVideoElement): tf.Tensor4D => {
-      return tf.tidy(() => {
-        // Capture frame from video
-        const frame = tf.browser.fromPixels(video);
+    async (video: HTMLVideoElement): Promise<tf.Tensor4D | null> => {
+      if (!faceModelRef.current) return null;
 
-        // Convert to grayscale
-        const grayscale = tf.mean(frame, 2, true);
+      // Create canvas once and reuse
+      if (!canvasRef.current) {
+        canvasRef.current = document.createElement('canvas');
+        canvasRef.current.width = fullConfig.inputSize;
+        canvasRef.current.height = fullConfig.inputSize;
+        ctxRef.current = canvasRef.current.getContext('2d', { willReadFrequently: true });
+      }
 
-        // Resize to model input size (48x48)
-        const resized = tf.image.resizeBilinear(
-          grayscale as tf.Tensor3D,
-          [fullConfig.inputSize, fullConfig.inputSize]
-        );
+      // Create debug canvas only if debug mode is enabled
+      if (fullConfig.debug && !debugCanvasRef.current) {
+        debugCanvasRef.current = document.createElement('canvas');
+        debugCanvasRef.current.width = fullConfig.inputSize;
+        debugCanvasRef.current.height = fullConfig.inputSize;
+        debugCanvasRef.current.id = 'emotion-debug-canvas';
+        debugCanvasRef.current.style.cssText = 'position:fixed;bottom:20px;left:20px;width:150px;height:150px;border:3px solid #8e5572;border-radius:12px;z-index:9999;image-rendering:pixelated;background:#000;';
+        document.body.appendChild(debugCanvasRef.current);
+      }
 
-        // Normalize to [0, 1]
-        const normalized = resized.div(255.0);
+      // Cache face detection - only run every N frames to reduce overhead
+      let predictions: blazeface.NormalizedFace[] = [];
+      const shouldDetectFace = faceDetectionFrameCountRef.current % FACE_DETECTION_CACHE_FRAMES === 0;
+      
+      if (shouldDetectFace) {
+        predictions = await faceModelRef.current.estimateFaces(video, false);
+        faceDetectionFrameCountRef.current = 0;
+      }
+      faceDetectionFrameCountRef.current++;
 
-        // Add batch dimension
-        return normalized.expandDims(0) as tf.Tensor4D;
-      });
+      if (predictions.length === 0) {
+        // Increment no-face counter
+        noFaceCountRef.current++;
+
+        // If no face for too long, clear the cached face box
+        if (noFaceCountRef.current >= NO_FACE_THRESHOLD) {
+          lastFaceBoxRef.current = null;
+          noFaceCountRef.current = 0; // Reset counter
+          return null;
+        }
+
+        // No face detected, use last known position if available
+        if (!lastFaceBoxRef.current) {
+          return null;
+        }
+        // Use cached face box (will be processed below)
+      } else {
+        // Reset no-face counter when face is found
+        noFaceCountRef.current = 0;
+        // Get the first face
+        const face = predictions[0];
+        const topLeft = face.topLeft as [number, number];
+        const bottomRight = face.bottomRight as [number, number];
+
+        // Calculate face box - VERY tight crop to match FER2013 training data
+        // BlazeFace returns a box around the face, but we need to adjust it
+        // to match the training data format (face fills entire frame)
+        const faceWidth = bottomRight[0] - topLeft[0];
+        const faceHeight = bottomRight[1] - topLeft[1];
+
+        // Make the crop square and centered on the face
+        const size = Math.max(faceWidth, faceHeight);
+        const centerX = (topLeft[0] + bottomRight[0]) / 2;
+        const centerY = (topLeft[1] + bottomRight[1]) / 2;
+
+        // Slight vertical offset (faces in FER2013 are slightly higher in frame)
+        const yOffset = -size * 0.05;
+
+        lastFaceBoxRef.current = {
+          x: Math.max(0, centerX - size / 2),
+          y: Math.max(0, centerY - size / 2 + yOffset),
+          width: size,
+          height: size,
+        };
+      }
+
+      const faceBox = lastFaceBoxRef.current!;
+      const ctx = ctxRef.current!;
+      const size = fullConfig.inputSize;
+
+      // Draw cropped face region and resize to 48x48 (optimized single draw)
+      ctx.drawImage(
+        video,
+        faceBox.x, faceBox.y, faceBox.width, faceBox.height, // source (face region)
+        0, 0, size, size // destination (48x48)
+      );
+
+      // Use getImageData once (faster than multiple operations)
+      const imageData = ctx.getImageData(0, 0, size, size);
+      const data = imageData.data;
+      const pixelCount = size * size;
+
+      // Convert to grayscale Float32Array directly with optimized loop
+      // Normalize to [0, 1] range (matching training: rescale=1./255)
+      const grayscale = new Float32Array(pixelCount);
+      const inv255 = 1.0 / 255.0;
+      for (let i = 0; i < pixelCount; i++) {
+        const idx = i * 4;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        // Normalize to [0, 1] to match training preprocessing (optimized grayscale)
+        grayscale[i] = (0.299 * r + 0.587 * g + 0.114 * b) * inv255;
+      }
+
+      // Update debug canvas only if debug mode is enabled
+      if (fullConfig.debug && debugCanvasRef.current) {
+        const debugCtx = debugCanvasRef.current.getContext('2d')!;
+        const debugImageData = debugCtx.createImageData(size, size);
+        for (let i = 0; i < size * size; i++) {
+          const val = Math.round(grayscale[i] * 255); // Convert back for display
+          debugImageData.data[i * 4] = val;
+          debugImageData.data[i * 4 + 1] = val;
+          debugImageData.data[i * 4 + 2] = val;
+          debugImageData.data[i * 4 + 3] = 255;
+        }
+        debugCtx.putImageData(debugImageData, 0, 0);
+      }
+
+      // Create tensor from preprocessed data
+      return tf.tensor4d(grayscale, [1, size, size, 1]);
     },
     [fullConfig.inputSize]
   );
@@ -275,13 +410,42 @@ export function useEmotionDetector(
    * Run inference on a single frame
    */
   const runInference = useCallback(async (): Promise<EmotionDetectionResult | null> => {
-    if (!modelRef.current || !videoRef.current) return null;
+    if (!modelRef.current || !videoRef.current || !faceModelRef.current) return null;
 
+    // Prevent concurrent inference runs
+    if (isInferringRef.current) {
+      if (fullConfig.debug) {
+        console.log('[EmotionDetector] Skipping inference - previous inference still running');
+      }
+      return null;
+    }
+
+    // Check if video has a new frame
+    const currentVideoTime = videoRef.current.currentTime;
+    if (currentVideoTime === lastVideoTimeRef.current) {
+      // Same frame, skip processing
+      if (fullConfig.debug) {
+        console.log('[EmotionDetector] Skipping - same video frame');
+      }
+      return null;
+    }
+    lastVideoTimeRef.current = currentVideoTime;
+
+    isInferringRef.current = true;
     const startTime = performance.now();
 
     try {
-      // Preprocess the video frame (wrapped in tidy for memory safety)
-      const inputTensor = preprocessFrame(videoRef.current);
+      // Preprocess the video frame with face detection
+      const inputTensor = await preprocessFrame(videoRef.current);
+
+      // No face detected
+      if (!inputTensor) {
+        if (fullConfig.debug) {
+          console.log('[EmotionDetector] No face detected');
+        }
+        isInferringRef.current = false;
+        return null;
+      }
 
       // Run prediction
       const prediction = modelRef.current.predict(inputTensor) as tf.Tensor;
@@ -294,12 +458,12 @@ export function useEmotionDetector(
       prediction.dispose();
 
       // Process results
-      // Model output order: happy, sad, surprise, neutral (indices 0, 1, 2, 3)
+      // Model output order: happy, neutral, sad, surprise (indices 0, 1, 2, 3)
       const scores: EmotionScores = {
         happy: probabilities[0],
-        sad: probabilities[1],
-        surprise: probabilities[2],
-        neutral: probabilities[3],
+        neutral: probabilities[1],
+        sad: probabilities[2],
+        surprise: probabilities[3],
       };
 
       // Find dominant emotion
@@ -322,39 +486,40 @@ export function useEmotionDetector(
         inferenceTime,
       };
 
+      // Log raw scores only in debug mode
       if (fullConfig.debug) {
-        console.log('[EmotionDetector] Detection:', {
-          emotion: dominantEmotion,
+        console.log('[EmotionDetector] RAW SCORES:', {
+          happy: probabilities[0].toFixed(3),
+          neutral: probabilities[1].toFixed(3),
+          sad: probabilities[2].toFixed(3),
+          surprise: probabilities[3].toFixed(3),
+          dominant: dominantEmotion,
           confidence: maxScore.toFixed(3),
-          latency: `${inferenceTime.toFixed(1)}ms`,
+          latency: inferenceTime.toFixed(2) + 'ms',
         });
       }
 
+      isInferringRef.current = false;
       return result;
     } catch (e) {
       console.error('[EmotionDetector] Inference error:', e);
       droppedFramesRef.current++;
+      isInferringRef.current = false;
       return null;
     }
   }, [preprocessFrame, fullConfig.debug]);
 
   /**
-   * Update performance metrics
+   * Update performance metrics (optimized - throttled to avoid blocking)
    */
   const updateMetrics = useCallback((latency: number) => {
-    // Track latency history
+    // Track latency history (limited size for speed)
     latencyHistoryRef.current.push(latency);
-    if (latencyHistoryRef.current.length > 100) {
+    if (latencyHistoryRef.current.length > 50) { // Reduced from 100 for speed
       latencyHistoryRef.current.shift();
     }
 
-    // Calculate average and p95 latency
-    const sorted = [...latencyHistoryRef.current].sort((a, b) => a - b);
-    const avgLatency = sorted.reduce((a, b) => a + b, 0) / sorted.length;
-    const p95Index = Math.floor(sorted.length * 0.95);
-    const p95Latency = sorted[p95Index] || avgLatency;
-
-    // Calculate FPS
+    // Calculate FPS and update metrics (throttled to 1 second)
     frameCountRef.current++;
     const now = performance.now();
     if (now - lastFpsUpdateRef.current >= 1000) {
@@ -362,11 +527,20 @@ export function useEmotionDetector(
       frameCountRef.current = 0;
       lastFpsUpdateRef.current = now;
 
+      // Fast latency calculation (avoid full sort for speed)
+      const latencies = latencyHistoryRef.current;
+      const avgLatency = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+      
+      // Simplified p95 (use last 20 values for speed)
+      const recent = latencies.slice(-20).sort((a, b) => a - b);
+      const p95Latency = recent[Math.floor(recent.length * 0.95)] || avgLatency;
+
       // Get memory info if available
       let memoryUsage = 0;
       const memInfo = tf.memory();
       memoryUsage = memInfo.numBytes / (1024 * 1024); // Convert to MB
 
+      // Batch state update
       setMetrics({
         fps,
         avgLatency,
@@ -380,12 +554,11 @@ export function useEmotionDetector(
   }, []);
 
   /**
-   * Detection loop
+   * Detection loop implementation
+   * Uses a ref-based approach to avoid stale closure issues
    */
-  const detectionLoop = useCallback(
+  const detectionLoopImpl = useCallback(
     async (timestamp: number) => {
-      if (!isDetecting || !isReady) return;
-
       // Throttle inference to configured interval
       if (timestamp - lastInferenceTimeRef.current >= fullConfig.inferenceInterval) {
         const result = await runInference();
@@ -410,12 +583,14 @@ export function useEmotionDetector(
 
         lastInferenceTimeRef.current = timestamp;
       }
-
-      // Continue loop
-      animationFrameRef.current = requestAnimationFrame(detectionLoop);
     },
-    [isDetecting, isReady, fullConfig.inferenceInterval, fullConfig.historySize, runInference, updateMetrics, contextActive]
+    [fullConfig.inferenceInterval, fullConfig.historySize, runInference, updateMetrics, contextActive]
   );
+
+  // Keep the ref updated with the latest implementation
+  useEffect(() => {
+    detectionLoopRef.current = detectionLoopImpl;
+  }, [detectionLoopImpl]);
 
   /**
    * Start detection on a video element
@@ -434,6 +609,10 @@ export function useEmotionDetector(
       droppedFramesRef.current = 0;
       lastInferenceTimeRef.current = 0;
       lastFpsUpdateRef.current = performance.now();
+      faceDetectionFrameCountRef.current = 0; // Reset face detection cache
+      lastVideoTimeRef.current = -1; // Reset video time tracking
+      noFaceCountRef.current = 0; // Reset no-face counter
+      isInferringRef.current = false; // Reset inference flag
 
       setIsDetecting(true);
       console.log('[EmotionDetector] Detection started');
@@ -449,25 +628,45 @@ export function useEmotionDetector(
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
+    isInferringRef.current = false;
     setIsDetecting(false);
     console.log('[EmotionDetector] Detection stopped');
   }, []);
 
   /**
    * Start/restart detection loop when isDetecting changes
+   * Uses a stable wrapper that calls through the ref to avoid stale closures
    */
   useEffect(() => {
-    if (isDetecting && isReady) {
-      animationFrameRef.current = requestAnimationFrame(detectionLoop);
-    }
+    if (!isDetecting || !isReady) return;
+
+    let isRunning = true;
+
+    const loop = async (timestamp: number) => {
+      if (!isRunning) return;
+
+      // Call the latest implementation via ref
+      if (detectionLoopRef.current) {
+        await detectionLoopRef.current(timestamp);
+      }
+
+      // Schedule next frame only if still running
+      if (isRunning) {
+        animationFrameRef.current = requestAnimationFrame(loop);
+      }
+    };
+
+    // Start the loop
+    animationFrameRef.current = requestAnimationFrame(loop);
 
     return () => {
+      isRunning = false;
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
     };
-  }, [isDetecting, isReady, detectionLoop]);
+  }, [isDetecting, isReady]);
 
   /**
    * Toggle context active state
