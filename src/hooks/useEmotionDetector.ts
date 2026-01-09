@@ -335,26 +335,43 @@ export function useEmotionDetector(
         const topLeft = face.topLeft as [number, number];
         const bottomRight = face.bottomRight as [number, number];
 
-        // Calculate face box - VERY tight crop to match FER2013 training data
-        // BlazeFace returns a box around the face, but we need to adjust it
-        // to match the training data format (face fills entire frame)
+        // Calculate face box - TIGHT crop to match FER2013 training data
+        // FER2013 faces fill ~80-90% of the 48x48 frame
+        // BlazeFace gives a loose box, so we shrink it to focus on face core
         const faceWidth = bottomRight[0] - topLeft[0];
         const faceHeight = bottomRight[1] - topLeft[1];
 
-        // Make the crop square and centered on the face
-        const size = Math.max(faceWidth, faceHeight);
+        // Center of detected face
         const centerX = (topLeft[0] + bottomRight[0]) / 2;
         const centerY = (topLeft[1] + bottomRight[1]) / 2;
 
-        // Slight vertical offset (faces in FER2013 are slightly higher in frame)
-        const yOffset = -size * 0.05;
+        // Use the smaller dimension and shrink to get tight face crop
+        // 0.75 factor removes extra padding BlazeFace adds
+        const baseSize = Math.min(faceWidth, faceHeight);
+        const cropSize = baseSize * 0.75;
 
-        lastFaceBoxRef.current = {
-          x: Math.max(0, centerX - size / 2),
-          y: Math.max(0, centerY - size / 2 + yOffset),
-          width: size,
-          height: size,
+        // Slight upward shift to center on eyes/nose rather than full head
+        const yOffset = -cropSize * 0.08;
+
+        const newBox = {
+          x: Math.max(0, centerX - cropSize / 2),
+          y: Math.max(0, centerY - cropSize / 2 + yOffset),
+          width: cropSize,
+          height: cropSize,
         };
+
+        // Smooth the face box to reduce jitter (lerp with previous position)
+        if (lastFaceBoxRef.current) {
+          const smoothing = 0.3; // 0 = no smoothing, 1 = full smoothing
+          lastFaceBoxRef.current = {
+            x: lastFaceBoxRef.current.x + (newBox.x - lastFaceBoxRef.current.x) * (1 - smoothing),
+            y: lastFaceBoxRef.current.y + (newBox.y - lastFaceBoxRef.current.y) * (1 - smoothing),
+            width: lastFaceBoxRef.current.width + (newBox.width - lastFaceBoxRef.current.width) * (1 - smoothing),
+            height: lastFaceBoxRef.current.height + (newBox.height - lastFaceBoxRef.current.height) * (1 - smoothing),
+          };
+        } else {
+          lastFaceBoxRef.current = newBox;
+        }
       }
 
       const faceBox = lastFaceBoxRef.current!;

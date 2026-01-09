@@ -56,7 +56,7 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
     inferenceInterval: 30,  // Ultra-fast - 33 FPS for <50ms latency
     historySize: 1,          // Minimal history for instant response
     preferWebGPU: true,
-    debug: false,            // Disable debug for production performance
+    debug: true,             // Show grayscale debug canvas
   });
 
   /**
