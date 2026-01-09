@@ -40,6 +40,6 @@ Required output shape: `[batch_size, 4]` (softmax probabilities)
 
 Output class order (IMPORTANT - must match this exact order):
 0. happy
-1. sad
-2. surprise
-3. neutral
+1. neutral
+2. sad
+3. surprise
