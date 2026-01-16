@@ -15,7 +15,7 @@ import { useWebcam } from '@/hooks/useWebcam';
 import WebcamFeed from './WebcamFeed';
 import ChatInterface from './ChatInterface';
 import DebugPanel from './DebugPanel';
-import { Eye, EyeOff, Maximize2, Minimize2, Sparkles, User } from 'lucide-react';
+import { Eye, EyeOff, Maximize2, User } from 'lucide-react';
 
 interface EmpatheticChatProps {
   /** Additional CSS classes */
@@ -25,7 +25,7 @@ interface EmpatheticChatProps {
 const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
   const [emotionEnabled, setEmotionEnabled] = useState(true);
   const [showDebug, setShowDebug] = useState(true);
-  const [webcamExpanded, setWebcamExpanded] = useState(false);
+  const [_webcamExpanded, _setWebcamExpanded] = useState(false);
 
   // Initialize hooks
   const {
@@ -54,9 +54,9 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
     setContextActive,
   } = useEmotionDetector({
     inferenceInterval: 30,  // Ultra-fast - 33 FPS for <50ms latency
-    historySize: 1,          // Minimal history for instant response
+    historySize: 2,          // Need at least 2 for stability checking (fixed Bug 2)
     preferWebGPU: true,
-    debug: true,             // Show grayscale debug canvas
+    debug: false,            // Disable debug for better performance
   });
 
   /**

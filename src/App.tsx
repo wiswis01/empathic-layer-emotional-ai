@@ -8,11 +8,26 @@
  * - Processes everything client-side for privacy
  */
 
+import { useState, useCallback } from 'react';
+
+
 import { EmpatheticChat } from '@/components';
+import LandingPage from '@/components/LandingPage';
 import './index.css';
 
 function App() {
-  return <EmpatheticChat />;
+  const [showChat, setShowChat] = useState(false);
+
+  // Memoize callback to prevent LandingPage re-renders
+  const handleEnter = useCallback(() => {
+    setShowChat(true);
+  }, []);
+
+  if (showChat) {
+    return <EmpatheticChat />;
+  }
+
+  return <LandingPage onEnter={handleEnter} />;
 }
 
 export default App;

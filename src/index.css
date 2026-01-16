@@ -135,6 +135,20 @@ body,
   overflow: hidden;
 }
 
+/* Performance optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* GPU acceleration for smooth animations */
+.animate-fade-in,
+button,
+nav {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
 body {
   /* Artistic organic background using ONLY palette colors */
   background:
@@ -287,6 +301,10 @@ p {
 
 .animate-gentle-float {
   animation: gentle-float 3s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
 }
 
 /* ============================================

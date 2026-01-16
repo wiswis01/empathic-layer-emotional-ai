@@ -56,7 +56,7 @@ export function getDominantEmotion(scores: EmotionScores): {
  */
 export function smoothEmotionScores(
   history: EmotionDetectionResult[],
-  alpha: number = 1.0  // 1.0 = no smoothing, use latest directly
+  _alpha: number = 1.0  // 1.0 = no smoothing, use latest directly
 ): EmotionScores {
   if (history.length === 0) {
     return {
@@ -116,7 +116,7 @@ export function calculateEmotionalDimensions(scores: EmotionScores): {
  */
 export function isEmotionStable(
   history: EmotionDetectionResult[],
-  threshold: number = 0.5  // Lower threshold for faster detection
+  _threshold: number = 0.5  // Lower threshold for faster detection
 ): boolean {
   if (history.length < 2) return false;
 

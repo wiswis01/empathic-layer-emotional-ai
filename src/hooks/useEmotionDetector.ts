@@ -158,7 +158,7 @@ export function useEmotionDetector(
   // Merge config with defaults - optimized for <50ms latency
   const fullConfig: EmotionDetectorConfig = {
     inferenceInterval: config.inferenceInterval ?? 30, // 30ms = ~33 FPS for ultra-fast updates
-    historySize: config.historySize ?? 1, // Minimal history for instant response
+    historySize: config.historySize ?? 2, // Need at least 2 for stability checking (was 1, causing Bug 2)
     minConfidence: config.minConfidence ?? 0.3,
     preferWebGPU: config.preferWebGPU ?? true,
     inputSize: config.inputSize ?? 48,
@@ -303,16 +303,20 @@ export function useEmotionDetector(
 
       // Cache face detection - only run every N frames to reduce overhead
       let predictions: blazeface.NormalizedFace[] = [];
+      let detectionRan = false; // Track if detection actually ran
       const shouldDetectFace = faceDetectionFrameCountRef.current % FACE_DETECTION_CACHE_FRAMES === 0;
       
       if (shouldDetectFace) {
         predictions = await faceModelRef.current.estimateFaces(video, false);
+        detectionRan = true; // Mark that detection was executed
         faceDetectionFrameCountRef.current = 0;
       }
       faceDetectionFrameCountRef.current++;
 
-      if (predictions.length === 0) {
-        // Increment no-face counter
+      // Only process no-face logic if detection actually ran
+      // This prevents false positives when detection is skipped
+      if (detectionRan && predictions.length === 0) {
+        // Increment no-face counter only when detection ran and found no face
         noFaceCountRef.current++;
 
         // If no face for too long, clear the cached face box
@@ -327,7 +331,7 @@ export function useEmotionDetector(
           return null;
         }
         // Use cached face box (will be processed below)
-      } else {
+      } else if (detectionRan && predictions.length > 0) {
         // Reset no-face counter when face is found
         noFaceCountRef.current = 0;
         // Get the first face
@@ -374,6 +378,11 @@ export function useEmotionDetector(
         }
       }
 
+      // If detection was skipped, we need a cached face box to continue
+      if (!detectionRan && !lastFaceBoxRef.current) {
+        return null; // No cached box available, skip this frame
+      }
+
       const faceBox = lastFaceBoxRef.current!;
       const ctx = ctxRef.current!;
       const size = fullConfig.inputSize;
@@ -406,15 +415,15 @@ export function useEmotionDetector(
       // Update debug canvas only if debug mode is enabled
       if (fullConfig.debug && debugCanvasRef.current) {
         const debugCtx = debugCanvasRef.current.getContext('2d')!;
-        const debugImageData = debugCtx.createImageData(size, size);
-        for (let i = 0; i < size * size; i++) {
-          const val = Math.round(grayscale[i] * 255); // Convert back for display
-          debugImageData.data[i * 4] = val;
-          debugImageData.data[i * 4 + 1] = val;
-          debugImageData.data[i * 4 + 2] = val;
-          debugImageData.data[i * 4 + 3] = 255;
-        }
-        debugCtx.putImageData(debugImageData, 0, 0);
+      const debugImageData = debugCtx.createImageData(size, size);
+      for (let i = 0; i < size * size; i++) {
+        const val = Math.round(grayscale[i] * 255); // Convert back for display
+        debugImageData.data[i * 4] = val;
+        debugImageData.data[i * 4 + 1] = val;
+        debugImageData.data[i * 4 + 2] = val;
+        debugImageData.data[i * 4 + 3] = 255;
+      }
+      debugCtx.putImageData(debugImageData, 0, 0);
       }
 
       // Create tensor from preprocessed data
@@ -504,15 +513,15 @@ export function useEmotionDetector(
 
       // Log raw scores only in debug mode
       if (fullConfig.debug) {
-        console.log('[EmotionDetector] RAW SCORES:', {
-          happy: probabilities[0].toFixed(3),
-          neutral: probabilities[1].toFixed(3),
-          sad: probabilities[2].toFixed(3),
-          surprise: probabilities[3].toFixed(3),
-          dominant: dominantEmotion,
-          confidence: maxScore.toFixed(3),
+      console.log('[EmotionDetector] RAW SCORES:', {
+        happy: probabilities[0].toFixed(3),
+        neutral: probabilities[1].toFixed(3),
+        sad: probabilities[2].toFixed(3),
+        surprise: probabilities[3].toFixed(3),
+        dominant: dominantEmotion,
+        confidence: maxScore.toFixed(3),
           latency: inferenceTime.toFixed(2) + 'ms',
-        });
+      });
       }
 
       isInferringRef.current = false;
