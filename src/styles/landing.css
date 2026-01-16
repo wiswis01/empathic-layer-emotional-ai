@@ -1,0 +1,252 @@
+/**
+ * Landing Page Styles - Minimal White Aesthetic
+ *
+ * Clean, full-screen experience with subtle effects.
+ */
+
+/* ============================================
+   LANDING CONTAINER
+   ============================================ */
+
+.landing {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ============================================
+   SUBTLE GRADIENT ORBS
+   ============================================ */
+
+.landing-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  pointer-events: none;
+  animation: orb-float 12s ease-in-out infinite;
+}
+
+.landing-orb--1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(142, 85, 114, 0.25) 0%, transparent 70%);
+  top: -10%;
+  right: -5%;
+  animation-delay: 0s;
+}
+
+.landing-orb--2 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(187, 190, 100, 0.2) 0%, transparent 70%);
+  bottom: -10%;
+  left: -5%;
+  animation-delay: -6s;
+}
+
+@keyframes orb-float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, -20px) scale(1.05);
+  }
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
+.landing-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  max-width: 600px;
+  z-index: 1;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+.landing-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 400;
+  line-height: 1.1;
+  color: #1a1a1a;
+  margin: 0 0 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.landing-title--accent {
+  background: linear-gradient(135deg, #8e5572 0%, #bbbe64 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.landing-subtitle {
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  color: #666666;
+  margin: 0 0 3rem;
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+/* ============================================
+   FEATURES
+   ============================================ */
+
+.landing-features {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.landing-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 100px;
+  transition: all 0.3s ease;
+}
+
+.landing-feature:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--feature-color, #8e5572);
+}
+
+.landing-feature-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--feature-color, #8e5572);
+  border-radius: 50%;
+  color: white;
+}
+
+.landing-feature-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.landing-feature-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.landing-feature-stat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--feature-color, #8e5572);
+  font-weight: 500;
+}
+
+/* ============================================
+   CTA BUTTON
+   ============================================ */
+
+.landing-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #8e5572 0%, #443850 100%);
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(142, 85, 114, 0.3);
+}
+
+.landing-cta:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 30px rgba(142, 85, 114, 0.4);
+}
+
+.landing-cta:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.landing-cta svg {
+  transition: transform 0.2s ease;
+}
+
+.landing-cta:hover svg {
+  transform: translateX(4px);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.landing-footer {
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+  color: #999999;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 640px) {
+  .landing-features {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .landing-feature {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .landing-orb--1 {
+    width: 300px;
+    height: 300px;
+  }
+
+  .landing-orb--2 {
+    width: 250px;
+    height: 250px;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-orb {
+    animation: none;
+  }
+
+  .landing-cta,
+  .landing-feature {
+    transition: none;
+  }
+}
