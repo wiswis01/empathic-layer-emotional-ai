@@ -24,10 +24,17 @@ export default defineConfig({
   optimizeDeps: {
     // Pre-bundle TensorFlow.js to avoid slow cold starts
     include: ['@tensorflow/tfjs', '@tensorflow/tfjs-backend-webgpu'],
+    // Exclude tfjs-tflite from optimization to avoid module resolution issues
+    exclude: ['@tensorflow/tfjs-tflite'],
   },
   build: {
     // Increase chunk size warning limit for ML models
     chunkSizeWarningLimit: 2000,
+    commonjsOptions: {
+      // Allow importing from CommonJS modules
+      include: [/node_modules/],
+      transformMixedEsModules: true,
+    },
     rollupOptions: {
       output: {
         manualChunks: {

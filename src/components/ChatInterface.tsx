@@ -17,6 +17,14 @@ import { speak, isElevenLabsConfigured } from '@/services/elevenLabsService';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { Send, Loader2, Bot, User, Settings, Sparkles, AlertCircle, Mic, MicOff, Volume2 } from 'lucide-react';
 
+interface UserData {
+  name: string;
+  feeling: number;
+  thoughts: string;
+  wellness: string;
+  positive: string;
+}
+
 interface ChatInterfaceProps {
   /** Current emotion context for LLM injection */
   emotionContext: EmotionContext | null;
@@ -24,6 +32,10 @@ interface ChatInterfaceProps {
   emotionEnabled: boolean;
   /** Callback to toggle emotion context */
   onToggleEmotion: (enabled: boolean) => void;
+  /** User's name for personalization */
+  userName?: string | null;
+  /** Complete user data from onboarding */
+  userData?: UserData | null;
   /** Additional CSS classes */
   className?: string;
 }
@@ -39,6 +51,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   emotionContext,
   emotionEnabled,
   onToggleEmotion,
+  userName: _userName,
+  userData: _userData,
   className,
 }) => {
   const [messages, setMessages] = useState<EmpatheticMessage[]>([]);

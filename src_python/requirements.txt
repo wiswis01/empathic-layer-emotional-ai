@@ -1,0 +1,29 @@
+# Empathic-01 Python Dependencies
+# ================================
+
+# Core Computer Vision
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# MediaPipe for Hand Gesture Detection
+mediapipe>=0.10.0
+
+# Audio Playback
+pygame>=2.5.0
+
+# Face Emotion Detection (optional but recommended)
+deepface>=0.0.79
+tf-keras>=2.15.0  # Required by DeepFace
+
+# Async support (included in Python 3.11+)
+# asyncio is built-in
+
+# Optional: For enhanced emotion detection models
+# tensorflow>=2.15.0  # Uncomment if using custom TF models
+
+# Development dependencies
+# ------------------------
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# mypy>=1.0.0

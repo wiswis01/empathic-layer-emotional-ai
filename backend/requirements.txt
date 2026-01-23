@@ -1,0 +1,5 @@
+deepface
+flask
+flask-cors
+opencv-python
+tf-keras

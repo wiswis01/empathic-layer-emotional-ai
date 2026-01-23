@@ -157,8 +157,8 @@ export function useEmotionDetector(
 ): UseEmotionDetectorReturn {
   // Merge config with defaults - optimized for <50ms latency
   const fullConfig: EmotionDetectorConfig = {
-    inferenceInterval: config.inferenceInterval ?? 30, // 30ms = ~33 FPS for ultra-fast updates
-    historySize: config.historySize ?? 2, // Need at least 2 for stability checking (was 1, causing Bug 2)
+    inferenceInterval: config.inferenceInterval ?? 50, // 50ms for better stability
+    historySize: config.historySize ?? 3, // Increased for better smoothing
     minConfidence: config.minConfidence ?? 0.3,
     preferWebGPU: config.preferWebGPU ?? true,
     inputSize: config.inputSize ?? 48,
@@ -194,6 +194,10 @@ export function useEmotionDetector(
   const lastFpsUpdateRef = useRef<number>(0);
   const droppedFramesRef = useRef<number>(0);
   const backendRef = useRef<string>('unknown');
+  // Smoothing refs for stable emotion output
+  const smoothedScoresRef = useRef<EmotionScores | null>(null);
+  const lastEmotionRef = useRef<EmotionLabel>('neutral');
+  const emotionStabilityRef = useRef<number>(0);
 
   /**
    * Initialize TensorFlow and load/create the model
@@ -483,15 +487,30 @@ export function useEmotionDetector(
       inputTensor.dispose();
       prediction.dispose();
 
-      // Process results - Model output order: happy, neutral, sad, surprise
-      const scores: EmotionScores = {
+      // Process results - Model output order: happy, sad, surprise, neutral
+      const rawScores: EmotionScores = {
         happy: probabilities[0],
-        neutral: probabilities[1],
-        sad: probabilities[2],
-        surprise: probabilities[3],
+        sad: probabilities[1],
+        surprise: probabilities[2],
+        neutral: probabilities[3],
       };
 
-      // Find dominant emotion
+      // Apply exponential moving average for smooth transitions
+      const alpha = 0.3; // Smoothing factor (lower = smoother but slower)
+      let scores: EmotionScores;
+      if (smoothedScoresRef.current) {
+        scores = {
+          happy: alpha * rawScores.happy + (1 - alpha) * smoothedScoresRef.current.happy,
+          sad: alpha * rawScores.sad + (1 - alpha) * smoothedScoresRef.current.sad,
+          surprise: alpha * rawScores.surprise + (1 - alpha) * smoothedScoresRef.current.surprise,
+          neutral: alpha * rawScores.neutral + (1 - alpha) * smoothedScoresRef.current.neutral,
+        };
+      } else {
+        scores = rawScores;
+      }
+      smoothedScoresRef.current = scores;
+
+      // Find dominant emotion from smoothed scores
       let maxScore = 0;
       let dominantEmotion: EmotionLabel = 'neutral';
       for (const [emotion, score] of Object.entries(scores) as [EmotionLabel, number][]) {
@@ -499,6 +518,21 @@ export function useEmotionDetector(
           maxScore = score;
           dominantEmotion = emotion;
         }
+      }
+
+      // Stabilize emotion - require 3 consistent frames before changing
+      if (dominantEmotion === lastEmotionRef.current) {
+        emotionStabilityRef.current++;
+      } else {
+        emotionStabilityRef.current = 1;
+      }
+
+      // Only change emotion if stable for 3+ frames
+      if (emotionStabilityRef.current >= 3) {
+        lastEmotionRef.current = dominantEmotion;
+      } else {
+        dominantEmotion = lastEmotionRef.current;
+        maxScore = scores[dominantEmotion];
       }
 
       const inferenceTime = performance.now() - startTime;
@@ -515,9 +549,9 @@ export function useEmotionDetector(
       if (fullConfig.debug) {
       console.log('[EmotionDetector] RAW SCORES:', {
         happy: probabilities[0].toFixed(3),
-        neutral: probabilities[1].toFixed(3),
-        sad: probabilities[2].toFixed(3),
-        surprise: probabilities[3].toFixed(3),
+        sad: probabilities[1].toFixed(3),
+        surprise: probabilities[2].toFixed(3),
+        neutral: probabilities[3].toFixed(3),
         dominant: dominantEmotion,
         confidence: maxScore.toFixed(3),
           latency: inferenceTime.toFixed(2) + 'ms',

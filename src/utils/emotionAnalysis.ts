@@ -11,7 +11,16 @@ import type {
   EmotionDetectionResult,
   EmotionalState,
   EmotionContext,
+  EnhancedEmotionContext,
+  ThreeDimensionalState,
+  BehavioralSignals,
+  TrajectoryPoint,
+  UncertaintyMetrics,
 } from '@/types/emotion';
+
+import { calculateThreeDimensions, getDimensionalDescription, describeControl } from './dimensionalEstimation';
+import { getUncertaintyDescription } from './uncertaintyQuantification';
+import { getTrajectory } from './behavioralInferencePipeline';
 
 /**
  * Valence values for each emotion (-1 to +1 scale)
@@ -251,4 +260,135 @@ Note: This emotional context is detected in real-time from the user's facial exp
 Use it to inform your tone and approach, but don't explicitly reference that you're analyzing their emotions.
 ---
 `.trim();
+}
+
+// ============================================================================
+// Enhanced 3D Emotional Context (PMC8969204 Adapted)
+// ============================================================================
+
+/**
+ * Create enhanced emotion context with 3D dimensional model
+ * Combines face emotion, behavioral signals, and uncertainty metrics
+ */
+export function createEnhancedEmotionContext(
+  history: EmotionDetectionResult[],
+  behavioralSignals: BehavioralSignals | null,
+  uncertaintyMetrics: UncertaintyMetrics | null,
+  isActive: boolean = true
+): EnhancedEmotionContext {
+  // Get base context
+  const baseContext = createEmotionContext(history, isActive);
+
+  // Calculate 3D dimensions from behavioral signals
+  let dimensions: ThreeDimensionalState;
+  if (behavioralSignals) {
+    dimensions = calculateThreeDimensions(
+      behavioralSignals,
+      undefined,
+      uncertaintyMetrics?.level || 'medium'
+    );
+  } else {
+    // Fallback to 2D from face emotion only
+    dimensions = {
+      arousal: baseContext.state.arousal,
+      valence: baseContext.state.valence,
+      control: 0.5, // Default control when no behavioral data
+      confidence: baseContext.state.confidence,
+      uncertainty: 'medium',
+    };
+  }
+
+  // Get trajectory
+  const trajectory: TrajectoryPoint[] = getTrajectory();
+
+  // Generate control description
+  const controlDescription = describeControl(dimensions.control);
+
+  return {
+    ...baseContext,
+    dimensions,
+    uncertaintyMetrics: uncertaintyMetrics || {
+      coupling: 0.5,
+      stability: 0.5,
+      signalDensity: 0.3,
+      overallUncertainty: 0.5,
+      level: 'medium',
+    },
+    controlDescription,
+    trajectory,
+  };
+}
+
+/**
+ * Format enhanced 3D context for injection into system prompt
+ */
+export function formatEnhancedContextForPrompt(context: EnhancedEmotionContext): string {
+  if (!context.isActive) {
+    return '';
+  }
+
+  const { dimensions, uncertaintyMetrics } = context;
+
+  // Get dimensional description
+  const dimensionalDesc = getDimensionalDescription(dimensions);
+
+  // Get uncertainty description
+  const uncertaintyDesc = getUncertaintyDescription(uncertaintyMetrics);
+
+  return `
+[EMOTIONAL CONTEXT - REAL-TIME 3D MODEL]
+${context.description}
+
+${dimensionalDesc}
+
+Dimensional State:
+- Arousal: ${dimensions.arousal.toFixed(2)} (${dimensions.arousal > 0.6 ? 'high energy' : dimensions.arousal < 0.4 ? 'low energy' : 'moderate'})
+- Valence: ${dimensions.valence.toFixed(2)} (${dimensions.valence > 0.2 ? 'positive' : dimensions.valence < -0.2 ? 'negative' : 'neutral'})
+- Control: ${dimensions.control.toFixed(2)} (${context.controlDescription})
+
+Confidence: ${uncertaintyDesc}
+
+Response Guidance: ${context.responseGuidance}
+
+Note: This emotional context is inferred in real-time from behavioral signals and facial expressions.
+Use it to inform your tone and approach, but don't explicitly reference that you're analyzing their state.
+---
+`.trim();
+}
+
+/**
+ * Describe trajectory trend for context
+ */
+export function describeTrajectoryTrend(trajectory: TrajectoryPoint[]): string {
+  if (trajectory.length < 3) {
+    return 'Insufficient data for trajectory analysis.';
+  }
+
+  const recent = trajectory.slice(-10);
+  const first = recent[0];
+  const last = recent[recent.length - 1];
+
+  const arousalDelta = last.arousal - first.arousal;
+  const valenceDelta = last.valence - first.valence;
+  const controlDelta = last.control - first.control;
+
+  const trends: string[] = [];
+
+  if (Math.abs(arousalDelta) > 0.2) {
+    trends.push(arousalDelta > 0 ? 'energy increasing' : 'energy decreasing');
+  }
+
+  if (Math.abs(valenceDelta) > 0.2) {
+    trends.push(valenceDelta > 0 ? 'mood improving' : 'mood declining');
+  }
+
+  if (Math.abs(controlDelta) > 0.2) {
+    trends.push(controlDelta > 0 ? 'gaining confidence' : 'becoming uncertain');
+  }
+
+  if (trends.length === 0) {
+    return 'Emotional state appears stable.';
+  }
+
+  return `Trajectory shows: ${trends.join(', ')}.`;
 }

@@ -144,7 +144,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
 
         {/* CTA */}
         <button ref={ctaRef} onClick={handleEnter} className="landing-cta">
-          <span>Start Chatting</span>
+          <span>Hey! Breathe in</span>
           <ArrowRight size={20} />
         </button>
 
