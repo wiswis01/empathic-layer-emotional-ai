@@ -6,6 +6,7 @@
  * - Smaller chat sidebar
  * - Clean, minimal design
  * - Pre-camera name input
+ * - Therapist Dashboard integration
  */
 
 import React, { useEffect, useCallback, useState, useRef } from 'react';
@@ -16,7 +17,8 @@ import { useWebcam } from '@/hooks/useWebcam';
 import WebcamFeed from './WebcamFeed';
 import ChatInterface from './ChatInterface';
 import NameInputScreen from './NameInputScreen';
-import { Camera } from 'lucide-react';
+import { TherapistDashboard } from './TherapistDashboard';
+import { Camera, Stethoscope } from 'lucide-react';
 
 interface EmpatheticChatProps {
   /** Additional CSS classes */
@@ -35,6 +37,7 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [showNameInput, setShowNameInput] = useState(true);
   const [emotionEnabled, setEmotionEnabled] = useState(true);
+  const [therapistMode, setTherapistMode] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const cameraRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
@@ -73,8 +76,8 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
     startDetection: startHandGestureDetection,
     stopDetection: stopHandGestureDetection,
   } = useHandGestureDetector({
-    inferenceInterval: 50, // Reduced for less lag
-    frameSkip: 2, // Process every 2nd frame
+    inferenceInterval: 50,
+    frameSkip: 2,
     debug: false,
   });
 
@@ -124,8 +127,6 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
       startWebcam();
     }
   }, [isWebcamActive, startWebcam, stopWebcam]);
-
-  // Note: Errors are handled individually in components
 
   // Show name input screen first
   if (showNameInput) {
@@ -229,6 +230,38 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
           >
             <Camera size={20} />
           </button>
+
+          {/* Therapist Mode Toggle */}
+          <button
+            onClick={() => setTherapistMode(!therapistMode)}
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              background: therapistMode
+                ? 'linear-gradient(135deg, #dc2626 0%, #8e5572 100%)'
+                : 'rgba(142, 85, 114, 0.1)',
+              border: therapistMode ? 'none' : '2px solid rgba(142, 85, 114, 0.3)',
+              color: therapistMode ? 'white' : '#8e5572',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: therapistMode
+                ? '0 8px 24px rgba(220, 38, 38, 0.3)'
+                : '0 4px 12px rgba(0, 0, 0, 0.05)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+            title={therapistMode ? 'Hide Therapist Dashboard' : 'Show Therapist Dashboard'}
+          >
+            <Stethoscope size={20} />
+          </button>
         </div>
 
         {/* Camera feed - large and centered */}
@@ -273,10 +306,30 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
               color: '#8e5572',
             }}
           >
-            Welcome, {userData.name} ✨
+            Welcome, {userData.name}
           </div>
         )}
+      </div>
+
+      {/* Therapist Dashboard Panel */}
+      {therapistMode && (
+        <div
+          style={{
+            width: '420px',
+            display: 'flex',
+            flexDirection: 'column',
+            borderLeft: '1px solid rgba(0, 0, 0, 0.06)',
+            background: '#f2f7f2',
+            overflow: 'hidden',
+          }}
+        >
+          <TherapistDashboard
+            emotionContext={emotionContext}
+            enabled={therapistMode}
+            compact={false}
+          />
         </div>
+      )}
 
       {/* Chat sidebar - SMALLER */}
       <div
