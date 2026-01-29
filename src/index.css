@@ -479,3 +479,22 @@ button:not(:disabled):active {
     color: var(--eggplant) !important;
   }
 }
+
+@layer base {
+  .theme {
+    --animate-rippling: rippling var(--duration) ease-out;
+  }
+}
+
+
+@theme inline {
+  @keyframes rippling {
+  0% {
+    opacity: 1;
+    }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+    }
+  }
+}

@@ -78,8 +78,8 @@ export function MagicCard({
         style={{
           background: useMotionTemplate`
           radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px,
-          ${gradientFrom}, 
-          ${gradientTo}, 
+          ${gradientFrom},
+          ${gradientTo},
           var(--border) 100%
           )
           `,

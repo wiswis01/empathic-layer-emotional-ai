@@ -9,14 +9,15 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Camera, Brain, MessageCircle, ArrowRight, Heart } from 'lucide-react';
+import { Camera, Brain, MessageCircle, Heart } from 'lucide-react';
 import { SpinningText } from '@/components/magicui/spinning-text';
 import { Highlighter } from '@/components/magicui/highlighter';
 import { TypingAnimation } from '@/components/magicui/typing-animation';
-import { Pointer } from '@/components/magicui/pointer';
 import { Marquee } from '@/components/magicui/marquee';
-import { Particles } from '@/components/ui/particles';
-import { MagicCard } from '@/components/ui/magic-card';
+import { Pointer } from '@/components/magicui/pointer';
+import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
+import { Particles } from '@/components/magicui/particles';
+import { MagicCard } from '@/components/magicui/magic-card';
 import gsap from 'gsap';
 import '@/styles/landing.css';
 
@@ -181,17 +182,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
         </div>
 
         {/* CTA */}
-        <button ref={ctaRef} onClick={handleEnter} className="landing-cta">
+        <InteractiveHoverButton
+          ref={ctaRef}
+          onClick={handleEnter}
+          className="landing-cta"
+        >
           <Pointer>
-            <Heart size={24} fill="#e91e63" color="#e91e63" />
+            <Heart size={20} fill="#e91e63" color="#e91e63" />
           </Pointer>
           <span>Start a quick check-in</span>
-          <ArrowRight size={20} />
-        </button>
+        </InteractiveHoverButton>
 
-        <p className="landing-footer">
-          Private by design. Your data stays with you.
-        </p>
       </main>
     </div>
   );
