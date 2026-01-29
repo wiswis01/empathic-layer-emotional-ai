@@ -9,15 +9,15 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Camera, Brain, MessageCircle, Heart } from 'lucide-react';
+import { Camera, Brain, MessageCircle } from 'lucide-react';
 import { SpinningText } from '@/components/magicui/spinning-text';
 import { Highlighter } from '@/components/magicui/highlighter';
 import { TypingAnimation } from '@/components/magicui/typing-animation';
 import { Marquee } from '@/components/magicui/marquee';
-import { Pointer } from '@/components/magicui/pointer';
-import { InteractiveHoverButton } from '@/components/magicui/interactive-hover-button';
 import { Particles } from '@/components/magicui/particles';
 import { MagicCard } from '@/components/magicui/magic-card';
+import { BlurFade } from '@/components/magicui/blur-fade';
+import { CanvasRevealButton } from '@/components/canvas';
 import gsap from 'gsap';
 import '@/styles/landing.css';
 
@@ -48,7 +48,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
-  const ctaRef = useRef<HTMLButtonElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   const handleEnter = useCallback(() => {
     onEnter();
@@ -152,46 +152,52 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
         {/* Key features - Double Marquee */}
         <div className="landing-features-wrapper" ref={featuresRef}>
           <Marquee pauseOnHover duration={25} gap={20} className="landing-features-marquee">
-            {FEATURES.map((feature) => {
+            {FEATURES.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <MagicCard key={feature.title} className="landing-feature-card">
-                  <div className="landing-feature-header">
-                    <h3 className="landing-feature-title">{feature.title}</h3>
-                    <Icon size={20} strokeWidth={1.5} className="landing-feature-icon" />
-                  </div>
-                  <p className="landing-feature-desc">{feature.description}</p>
-                </MagicCard>
+                <BlurFade key={feature.title} delay={0.1 * index} inView>
+                  <MagicCard className={`landing-feature-card landing-feature-card--${index + 1}`}>
+                    <div className="landing-feature-header">
+                      <h3 className="landing-feature-title">{feature.title}</h3>
+                      <Icon size={20} strokeWidth={1.5} className="landing-feature-icon" />
+                    </div>
+                    <p className="landing-feature-desc">{feature.description}</p>
+                  </MagicCard>
+                </BlurFade>
               );
             })}
           </Marquee>
           <Marquee pauseOnHover reverse duration={25} gap={20} className="landing-features-marquee">
-            {FEATURES.map((feature) => {
+            {FEATURES.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <MagicCard key={`${feature.title}-rev`} className="landing-feature-card">
-                  <div className="landing-feature-header">
-                    <h3 className="landing-feature-title">{feature.title}</h3>
-                    <Icon size={20} strokeWidth={1.5} className="landing-feature-icon" />
-                  </div>
-                  <p className="landing-feature-desc">{feature.description}</p>
-                </MagicCard>
+                <BlurFade key={`${feature.title}-rev`} delay={0.15 * index} inView>
+                  <MagicCard className={`landing-feature-card landing-feature-card--${index + 1}`}>
+                    <div className="landing-feature-header">
+                      <h3 className="landing-feature-title">{feature.title}</h3>
+                      <Icon size={20} strokeWidth={1.5} className="landing-feature-icon" />
+                    </div>
+                    <p className="landing-feature-desc">{feature.description}</p>
+                  </MagicCard>
+                </BlurFade>
               );
             })}
           </Marquee>
         </div>
 
-        {/* CTA */}
-        <InteractiveHoverButton
-          ref={ctaRef}
-          onClick={handleEnter}
-          className="landing-cta"
-        >
-          <Pointer>
-            <Heart size={20} fill="#e91e63" color="#e91e63" />
-          </Pointer>
-          <span>Start a quick check-in</span>
-        </InteractiveHoverButton>
+        {/* CTA with Canvas Reveal Effect */}
+        <div ref={ctaRef}>
+          <CanvasRevealButton
+            onClick={handleEnter}
+            className="landing-cta"
+            colors={[[255, 255, 255]]}
+            animationSpeed={2.5}
+            dotSize={1.2}
+            density={5}
+          >
+            <span className="text-white">Start a quick check-in</span>
+          </CanvasRevealButton>
+        </div>
 
       </main>
     </div>
