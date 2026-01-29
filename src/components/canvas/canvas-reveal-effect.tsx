@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { motion, useAnimation } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface CanvasRevealEffectProps {
   animationSpeed?: number;
@@ -155,7 +155,7 @@ interface CardProps {
   colors?: number[][];
 }
 
-export const Card: React.FC<CardProps> = ({ title, icon, children, colors }) => {
+export const Card: React.FC<CardProps> = ({ title, icon, colors }) => {
   const [hovered, setHovered] = useState(false);
 
   return (

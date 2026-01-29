@@ -151,53 +151,55 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
 
         {/* Key features - Double Marquee */}
         <div className="landing-features-wrapper" ref={featuresRef}>
-          <Marquee pauseOnHover duration={25} gap={20} className="landing-features-marquee">
-            {FEATURES.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <BlurFade key={feature.title} delay={0.1 * index} inView>
-                  <MagicCard className={`landing-feature-card landing-feature-card--${index + 1}`}>
+          <BlurFade delay={0.3} duration={0.8} blur="10px" offset={30} direction="up">
+            <Marquee pauseOnHover duration={25} gap={20} className="landing-features-marquee">
+              {FEATURES.map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <MagicCard key={feature.title} className={`landing-feature-card landing-feature-card--${index + 1}`}>
                     <div className="landing-feature-header">
                       <h3 className="landing-feature-title">{feature.title}</h3>
                       <Icon size={20} strokeWidth={1.5} className="landing-feature-icon" />
                     </div>
                     <p className="landing-feature-desc">{feature.description}</p>
                   </MagicCard>
-                </BlurFade>
-              );
-            })}
-          </Marquee>
-          <Marquee pauseOnHover reverse duration={25} gap={20} className="landing-features-marquee">
-            {FEATURES.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <BlurFade key={`${feature.title}-rev`} delay={0.15 * index} inView>
-                  <MagicCard className={`landing-feature-card landing-feature-card--${index + 1}`}>
+                );
+              })}
+            </Marquee>
+          </BlurFade>
+          <BlurFade delay={0.5} duration={0.8} blur="10px" offset={30} direction="up">
+            <Marquee pauseOnHover reverse duration={25} gap={20} className="landing-features-marquee">
+              {FEATURES.map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <MagicCard key={`${feature.title}-rev`} className={`landing-feature-card landing-feature-card--${index + 1}`}>
                     <div className="landing-feature-header">
                       <h3 className="landing-feature-title">{feature.title}</h3>
                       <Icon size={20} strokeWidth={1.5} className="landing-feature-icon" />
                     </div>
                     <p className="landing-feature-desc">{feature.description}</p>
                   </MagicCard>
-                </BlurFade>
-              );
-            })}
-          </Marquee>
+                );
+              })}
+            </Marquee>
+          </BlurFade>
         </div>
 
         {/* CTA with Canvas Reveal Effect */}
-        <div ref={ctaRef}>
-          <CanvasRevealButton
-            onClick={handleEnter}
-            className="landing-cta"
-            colors={[[255, 255, 255]]}
-            animationSpeed={2.5}
-            dotSize={1.2}
-            density={5}
-          >
-            <span className="text-white">Start a quick check-in</span>
-          </CanvasRevealButton>
-        </div>
+        <BlurFade delay={0.7} duration={0.8} blur="10px" offset={25} direction="up">
+          <div ref={ctaRef}>
+            <CanvasRevealButton
+              onClick={handleEnter}
+              className="landing-cta"
+              colors={[[0, 0, 0]]}
+              animationSpeed={2.5}
+              dotSize={1.2}
+              density={5}
+            >
+              <span className="text-black">Start a quick check-in</span>
+            </CanvasRevealButton>
+          </div>
+        </BlurFade>
 
       </main>
     </div>

@@ -2,15 +2,10 @@ import { useRef } from "react"
 import {
   AnimatePresence,
   motion,
-  MotionProps,
   useInView,
-  UseInViewOptions,
-  Variants,
 } from "motion/react"
 
-type MarginType = UseInViewOptions["margin"]
-
-interface BlurFadeProps extends MotionProps {
+interface BlurFadeProps {
   children: React.ReactNode
   className?: string
   variant?: {
@@ -22,7 +17,7 @@ interface BlurFadeProps extends MotionProps {
   offset?: number
   direction?: "up" | "down" | "left" | "right"
   inView?: boolean
-  inViewMargin?: MarginType
+  inViewMargin?: string
   blur?: string
 }
 
@@ -37,12 +32,11 @@ export function BlurFade({
   inView = false,
   inViewMargin = "-50px",
   blur = "6px",
-  ...props
 }: BlurFadeProps) {
   const ref = useRef(null)
-  const inViewResult = useInView(ref, { once: true, margin: inViewMargin })
+  const inViewResult = useInView(ref, { once: true, margin: inViewMargin as unknown as undefined })
   const isInView = !inView || inViewResult
-  const defaultVariants: Variants = {
+  const defaultVariants = {
     hidden: {
       [direction === "left" || direction === "right" ? "x" : "y"]:
         direction === "right" || direction === "down" ? -offset : offset,
@@ -70,7 +64,6 @@ export function BlurFade({
           ease: "easeOut",
         }}
         className={className}
-        {...props}
       >
         {children}
       </motion.div>
