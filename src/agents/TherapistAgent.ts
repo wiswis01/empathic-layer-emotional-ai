@@ -10,30 +10,26 @@
  * This agent assists therapists - it does NOT replace clinical judgment.
  */
 
-import type { EmotionLabel, EmotionContext, EmotionDetectionResult } from '../types/emotion';
+import type { EmotionLabel, EmotionDetectionResult } from '../types/emotion';
 import {
-  TherapistSuggestion,
   SuggestionType,
   RiskLevel,
-  AgentConfig,
   DEFAULT_AGENT_CONFIG,
+  ClinicalCondition
+} from './types';
+import type {
+  TherapistSuggestion,
+  AgentConfig,
   EmotionContextSnapshot,
   TherapistMetrics,
   PatternMatch,
   SessionReport,
   AgentEvent,
-  AgentEventHandler,
-  ClinicalCondition
+  AgentEventHandler
 } from './types';
 
 // Import tools
-import {
-  matchPatterns,
-  getDominantPattern,
-  calculateEmotionalStability,
-  getPatternSummary,
-  getRelevantQuestionTopics
-} from './tools/clinicalPatterns';
+import { matchPatterns } from './tools/clinicalPatterns';
 
 import {
   RiskDetector,
@@ -42,11 +38,7 @@ import {
   getRiskLevelText
 } from './tools/riskDetector';
 
-import {
-  QuestionBank,
-  EMOTION_QUESTIONS,
-  CONDITION_QUESTIONS
-} from './tools/questionBank';
+import { QuestionBank } from './tools/questionBank';
 
 import {
   SessionTracker,
@@ -56,8 +48,6 @@ import {
 
 // Import prompts
 import {
-  buildEmotionContextBlock,
-  buildSessionContextBlock,
   createQuestionRephrasingPrompt,
   getEmotionGuidance,
   getConditionApproach
@@ -406,7 +396,6 @@ export class TherapistAgent {
 
   private suggestTopics(): TherapistSuggestion[] {
     const suggestions: TherapistSuggestion[] = [];
-    const uncovered = this.sessionTracker.getHighPriorityUncoveredTopics();
     const patterns = this.sessionTracker.getActivePatterns();
 
     // Only suggest topics after some session time

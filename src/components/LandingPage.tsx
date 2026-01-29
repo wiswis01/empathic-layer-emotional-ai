@@ -9,7 +9,12 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Camera, Brain, MessageCircle, ArrowRight } from 'lucide-react';
+import { Camera, Brain, MessageCircle, ArrowRight, Heart } from 'lucide-react';
+import { SpinningText } from '@/components/magicui/spinning-text';
+import { Highlighter } from '@/components/magicui/highlighter';
+import { TypingAnimation } from '@/components/magicui/typing-animation';
+import { Pointer } from '@/components/magicui/pointer';
+import { AnimatedList } from '@/components/magicui/animated-list';
 import gsap from 'gsap';
 import '@/styles/landing.css';
 
@@ -20,24 +25,21 @@ interface LandingPageProps {
 const FEATURES = [
   {
     icon: Camera,
-    title: 'Capture',
-    stat: '<10ms',
-    label: 'Frame capture',
-    color: '#8e5572',
+    title: 'Understands Your Signals',
+    description: 'Real-time detection of facial expressions and micro-emotions to understand how you truly feel.',
+    bg: '#E3F2FD',
   },
   {
     icon: Brain,
-    title: 'Analyze',
-    stat: '<100ms',
-    label: 'Inference',
-    color: '#bbbe64',
+    title: 'Interprets Your Emotions',
+    description: 'Advanced AI analyzes emotional patterns and provides personalized, empathetic responses.',
+    bg: '#E0F7FA',
   },
   {
     icon: MessageCircle,
-    title: 'Adapt',
-    stat: '<200ms',
-    label: 'First token',
-    color: '#443850',
+    title: 'Responds With Care',
+    description: 'Thoughtful conversations that adapt to your emotional state in real-time.',
+    bg: '#E8EAF6',
   },
 ];
 
@@ -104,52 +106,70 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
 
   return (
     <div className="landing" ref={containerRef}>
+
+      {/* Brand logo - top left */}
+      <div className="landing-brand">
+        <TypingAnimation duration={150} delay={300} cursorStyle="line">
+          Empath
+        </TypingAnimation>
+      </div>
+
       {/* Subtle gradient orbs */}
       <div className="landing-orb landing-orb--1" />
       <div className="landing-orb landing-orb--2" />
 
+      {/* Spinning text - bottom right */}
+      <div ref={subtitleRef} className="landing-subtitle-container">
+        <SpinningText
+          duration={12}
+          radius={6}
+          className="landing-spinning-text"
+        >
+          {`Private • Secure • Empathic • Always with you • `}
+        </SpinningText>
+      </div>
+
       {/* Main content */}
       <main className="landing-main">
         <h1 ref={titleRef} className="landing-title">
-          Emotion-Aware
-          <br />
-          <span className="landing-title--accent">AI Conversations</span>
+          <Highlighter action="underline" color="#F5A623">
+            Conversations
+          </Highlighter>
+          {" that "}
+          <Highlighter action="highlight" color="#87CEFA">
+            understand you
+          </Highlighter>
         </h1>
 
-        <p ref={subtitleRef} className="landing-subtitle">
-          AI that understands how you feel. Privacy-first. Ultra-fast.
-        </p>
-
-        {/* Key features */}
-        <div className="landing-features" ref={featuresRef}>
+        {/* Key features - Bento Grid */}
+        <AnimatedList delay={400} className="landing-features-grid" ref={featuresRef}>
           {FEATURES.map((feature) => {
             const Icon = feature.icon;
             return (
               <div
                 key={feature.title}
-                className="landing-feature"
-                style={{ '--feature-color': feature.color } as React.CSSProperties}
+                className="landing-feature-card"
+                style={{ backgroundColor: feature.bg }}
               >
-                <div className="landing-feature-icon">
-                  <Icon size={24} />
-                </div>
-                <div className="landing-feature-content">
-                  <span className="landing-feature-title">{feature.title}</span>
-                  <span className="landing-feature-stat">{feature.stat}</span>
-                </div>
+                <Icon size={28} strokeWidth={1.5} className="landing-feature-icon" />
+                <h3 className="landing-feature-title">{feature.title}</h3>
+                <p className="landing-feature-desc">{feature.description}</p>
               </div>
             );
           })}
-        </div>
+        </AnimatedList>
 
         {/* CTA */}
         <button ref={ctaRef} onClick={handleEnter} className="landing-cta">
-          <span>Hey! Breathe in</span>
+          <Pointer>
+            <Heart size={24} fill="#e91e63" color="#e91e63" />
+          </Pointer>
+          <span>Start a gentle check-in</span>
           <ArrowRight size={20} />
         </button>
 
         <p className="landing-footer">
-          No account required. Your data stays on your device.
+          Private by design. Your data stays with you.
         </p>
       </main>
     </div>

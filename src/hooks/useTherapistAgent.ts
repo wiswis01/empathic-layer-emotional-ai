@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import type { EmotionContext, EmotionDetectionResult } from '../types/emotion';
+import type { EmotionContext } from '../types/emotion';
 import {
   TherapistAgent,
   createTherapistAgent,
@@ -172,7 +172,7 @@ export function useTherapistAgent(
 
   // Session duration timer
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isSessionActive && agentRef.current) {
       interval = setInterval(() => {

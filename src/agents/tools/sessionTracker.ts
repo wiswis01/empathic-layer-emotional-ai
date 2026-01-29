@@ -9,12 +9,11 @@
  */
 
 import type { EmotionLabel, EmotionDetectionResult } from '../../types/emotion';
-import {
+import { TopicDepth, RiskLevel } from '../types';
+import type {
   SessionState,
   TopicCoverage,
-  TopicDepth,
   RiskIndicator,
-  RiskLevel,
   TherapistSuggestion,
   SessionReport,
   PatternMatch,
@@ -168,7 +167,7 @@ export class SessionTracker {
 
   private initializeState(
     sessionId: string,
-    patientHistory?: { previousTopics?: string[] }
+    _patientHistory?: { previousTopics?: string[] }
   ): SessionState {
     const topicsCovered: TopicCoverage[] = this.config.topics.map(topic => ({
       topic: topic.id,

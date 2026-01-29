@@ -324,7 +324,7 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
           }}
         >
           <TherapistDashboard
-            emotionContext={emotionContext}
+            emotionContext={emotionContext ?? undefined}
             enabled={therapistMode}
             compact={false}
           />

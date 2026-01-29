@@ -5,7 +5,7 @@
  * Integrates rule-based detection with LLM question phrasing.
  */
 
-import type { EmotionLabel, EmotionContext, EmotionalState } from '../types/emotion';
+import type { EmotionLabel, EmotionContext } from '../types/emotion';
 
 // ============================================================================
 // ENUMS

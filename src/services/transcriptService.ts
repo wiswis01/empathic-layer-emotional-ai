@@ -15,6 +15,21 @@ import type { EmotionLabel } from '../types/emotion';
 import type { TranscriptSegment, SessionTranscript } from '../agents/types';
 
 // ============================================================================
+// WEB SPEECH API BROWSER SUPPORT
+// ============================================================================
+
+// Web Speech API browser support - use any to avoid conflicts with lib.dom.d.ts
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SpeechRecognitionType = any;
+
+// Get the SpeechRecognition constructor from the browser
+function getSpeechRecognition(): SpeechRecognitionType | null {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const w = window as any;
+  return w.SpeechRecognition || w.webkitSpeechRecognition || null;
+}
+
+// ============================================================================
 // TYPES
 // ============================================================================
 
@@ -57,7 +72,7 @@ const DEFAULT_CONFIG: TranscriptServiceConfig = {
 export class TranscriptService {
   private config: TranscriptServiceConfig;
   private callbacks: TranscriptCallbacks;
-  private recognition: SpeechRecognition | null = null;
+  private recognition: SpeechRecognitionType | null = null;
   private isListening: boolean = false;
   private sessionId: string = '';
   private segments: TranscriptSegment[] = [];
@@ -78,25 +93,25 @@ export class TranscriptService {
 
   private initRecognition(): void {
     // Check for browser support
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognitionConstructor = getSpeechRecognition();
 
-    if (!SpeechRecognition) {
+    if (!SpeechRecognitionConstructor) {
       console.warn('Speech recognition not supported in this browser');
       return;
     }
 
-    this.recognition = new SpeechRecognition();
+    this.recognition = new SpeechRecognitionConstructor();
     this.recognition.lang = this.config.language;
     this.recognition.continuous = this.config.continuous;
     this.recognition.interimResults = this.config.interimResults;
 
     // Handle results
-    this.recognition.onresult = (event: SpeechRecognitionEvent) => {
+    this.recognition.onresult = (event: SpeechRecognitionType) => {
       this.handleResult(event);
     };
 
     // Handle errors
-    this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    this.recognition.onerror = (event: SpeechRecognitionType) => {
       console.error('Speech recognition error:', event.error);
       if (this.callbacks.onError) {
         this.callbacks.onError(new Error(event.error));
@@ -115,7 +130,7 @@ export class TranscriptService {
     };
   }
 
-  private handleResult(event: SpeechRecognitionEvent): void {
+  private handleResult(event: SpeechRecognitionType): void {
     const now = Date.now();
 
     for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -217,7 +232,7 @@ export class TranscriptService {
    * Check if speech recognition is supported.
    */
   isSupported(): boolean {
-    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    return getSpeechRecognition() !== null;
   }
 
   /**
@@ -397,13 +412,3 @@ export function createTranscriptService(
   return new TranscriptService(config, callbacks);
 }
 
-// ============================================================================
-// TYPE DECLARATIONS FOR WEB SPEECH API
-// ============================================================================
-
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
-}

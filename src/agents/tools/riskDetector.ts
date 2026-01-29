@@ -10,13 +10,9 @@
  * It is NOT a substitute for clinical judgment.
  */
 
-import type { EmotionDetectionResult, EmotionLabel } from '../../types/emotion';
-import {
-  RiskLevel,
-  RiskIndicator,
-  RiskAssessment,
-  EmotionContextSnapshot
-} from '../types';
+import type { EmotionDetectionResult } from '../../types/emotion';
+import { RiskLevel } from '../types';
+import type { RiskIndicator, RiskAssessment } from '../types';
 
 // ============================================================================
 // CRISIS KEYWORDS - Configurable
@@ -343,7 +339,6 @@ export class RiskDetector {
 
     const recent = history.slice(-20);
     const emotions = recent.map(h => h.dominantEmotion);
-    const confidences = recent.map(h => h.confidence);
 
     // Calculate sadness persistence
     const sadCount = emotions.filter(e => e === 'sad').length;

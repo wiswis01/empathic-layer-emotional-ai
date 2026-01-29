@@ -12,8 +12,7 @@ import type { EmotionLabel, EmotionDetectionResult } from '../../types/emotion';
 import type {
   ClinicalPattern,
   ClinicalCondition,
-  PatternMatch,
-  EmotionContextSnapshot
+  PatternMatch
 } from '../types';
 
 // ============================================================================
@@ -267,7 +266,6 @@ function detectMarkers(
   const detected: string[] = [];
   if (history.length < 3) return detected;
 
-  const distribution = calculateEmotionDistribution(history);
   const recentEmotions = history.slice(-10).map(h => h.dominantEmotion);
 
   // Check for persistent sadness

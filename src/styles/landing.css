@@ -21,6 +21,22 @@
 }
 
 /* ============================================
+   BRAND LOGO - TOP LEFT
+   ============================================ */
+
+.landing-brand {
+  position: absolute;
+  top: 1rem;
+  left: 2rem;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  z-index: 10;
+}
+
+/* ============================================
    SUBTLE GRADIENT ORBS
    ============================================ */
 
@@ -70,7 +86,7 @@
   align-items: center;
   text-align: center;
   padding: 2rem;
-  max-width: 600px;
+  max-width: 850px;
   z-index: 1;
 }
 
@@ -79,20 +95,19 @@
    ============================================ */
 
 .landing-title {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: clamp(2.5rem, 8vw, 4rem);
-  font-weight: 400;
-  line-height: 1.1;
-  color: #1a1a1a;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.2;
+  color: #000000;
   margin: 0 0 1.5rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .landing-title--accent {
-  background: linear-gradient(135deg, #8e5572 0%, #bbbe64 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #000000;
 }
 
 .landing-subtitle {
@@ -103,63 +118,89 @@
   max-width: 400px;
 }
 
+.landing-subtitle-container {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.landing-spinning-text {
+  position: absolute;
+  inset: 0;
+  font-size: 0.875rem;
+  color: black;
+  font-weight: 500;
+}
+
+.landing-subtitle-center {
+  text-align: center;
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  color: #666666;
+  line-height: 1.4;
+  max-width: 120px;
+}
+
 /* ============================================
-   FEATURES
+   FEATURES - BENTO GRID
    ============================================ */
 
-.landing-features {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 3rem;
-  flex-wrap: wrap;
-  justify-content: center;
+.landing-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  width: 100%;
+  max-width: 1000px;
 }
 
-.landing-feature {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 100px;
-  transition: all 0.3s ease;
-}
-
-.landing-feature:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  border-color: var(--feature-color, #8e5572);
-}
-
-.landing-feature-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--feature-color, #8e5572);
-  border-radius: 50%;
-  color: white;
-}
-
-.landing-feature-content {
+.landing-feature-card {
+  padding: 1.5rem;
+  border-radius: 16px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  gap: 0.75rem;
 }
 
-.landing-feature-title {
-  font-size: 0.875rem;
+.landing-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(135, 206, 250, 0.25);
+}
+
+.landing-feature-card .landing-feature-icon {
+  color: #1a1a1a;
+  width: auto;
+  height: auto;
+  background: none;
+}
+
+.landing-feature-card .landing-feature-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
   font-weight: 600;
   color: #1a1a1a;
+  margin: 0;
 }
 
-.landing-feature-stat {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  color: var(--feature-color, #8e5572);
-  font-weight: 500;
+.landing-feature-card .landing-feature-desc {
+  font-size: 0.8rem;
+  color: #555555;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive grid */
+@media (max-width: 768px) {
+  .landing-features-grid {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+  }
 }
 
 /* ============================================

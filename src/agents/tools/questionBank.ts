@@ -8,13 +8,8 @@
  */
 
 import type { EmotionLabel } from '../../types/emotion';
-import {
-  QuestionCategory,
-  ClinicalCondition,
-  TherapeuticQuestion,
-  SessionState,
-  PatternMatch
-} from '../types';
+import { QuestionCategory, ClinicalCondition } from '../types';
+import type { TherapeuticQuestion, PatternMatch } from '../types';
 
 // ============================================================================
 // QUESTION TEMPLATES BY EMOTION
@@ -527,7 +522,7 @@ export class QuestionBank {
    */
   getQuestionsForEmotion(
     emotion: EmotionLabel,
-    confidence: number,
+    _confidence: number,
     sessionContext: {
       sessionTimeSeconds: number;
       isInCrisis: boolean;
@@ -633,7 +628,7 @@ export class QuestionBank {
    * Get follow-up questions based on previous topic and emotion shift.
    */
   getFollowUpQuestions(
-    previousTopic: string,
+    _previousTopic: string,
     emotionShift?: { from: EmotionLabel; to: EmotionLabel }
   ): TherapeuticQuestion[] {
     const followUps: TherapeuticQuestion[] = [];

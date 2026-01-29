@@ -9,7 +9,7 @@
  * - Topic coverage tracking
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { EmotionContext } from '../types/emotion';
 import {
   useTherapistAgent,
@@ -56,16 +56,16 @@ export function TherapistDashboard({
   llmCallback
 }: TherapistDashboardProps) {
   const [activeTab, setActiveTab] = useState<'suggestions' | 'metrics' | 'transcript' | 'topics'>('suggestions');
-  const [transcript, setTranscript] = useState<TranscriptSegment[]>([]);
+  const [transcript] = useState<TranscriptSegment[]>([]);
 
   // Initialize therapist agent
   const agent = useTherapistAgent({
     autoStart: true,
     llmCallback,
-    onSuggestion: (suggestion) => {
+    onSuggestion: (_suggestion) => {
       // Could add toast notification here
     },
-    onRiskAlert: (suggestion) => {
+    onRiskAlert: (_suggestion) => {
       // Could add sound/vibration alert here
     }
   });

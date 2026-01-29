@@ -10,8 +10,7 @@ import type {
   ClinicalCondition,
   PatternMatch,
   RiskLevel,
-  SessionState,
-  TherapeuticQuestion
+  SessionState
 } from '../types';
 
 // ============================================================================
