@@ -11,7 +11,6 @@ interface TypingAnimationProps {
   startOnView?: boolean;
   showCursor?: boolean;
   cursorStyle?: "line" | "block" | "underscore";
-  as?: React.ElementType;
 }
 
 export function TypingAnimation({
@@ -22,11 +21,10 @@ export function TypingAnimation({
   startOnView = true,
   showCursor = true,
   cursorStyle = "line",
-  as: Component = "span",
 }: TypingAnimationProps) {
   const [displayedText, setDisplayedText] = useState("");
   const [started, setStarted] = useState(false);
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true });
 
   useEffect(() => {
@@ -64,7 +62,7 @@ export function TypingAnimation({
   }[cursorStyle];
 
   return (
-    <Component ref={ref} className={className}>
+    <span ref={ref} className={className}>
       {displayedText}
       {showCursor && (
         <span className="typing-cursor" style={{
@@ -80,7 +78,7 @@ export function TypingAnimation({
           50% { opacity: 0; }
         }
       `}</style>
-    </Component>
+    </span>
   );
 }
 

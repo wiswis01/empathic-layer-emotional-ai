@@ -1,14 +1,15 @@
 "use client";
 
 import { motion, type Transition, type Variants } from "framer-motion";
-import { type ComponentPropsWithoutRef, useMemo } from "react";
+import { useMemo } from "react";
 
-interface SpinningTextProps extends ComponentPropsWithoutRef<"div"> {
+interface SpinningTextProps {
   children: string;
   duration?: number;
   reverse?: boolean;
   radius?: number;
   transition?: Transition;
+  className?: string;
   variants?: {
     container?: Variants;
     item?: Variants;
@@ -23,10 +24,6 @@ export function SpinningText({
   transition,
   variants,
   className,
-  onDrag,
-  onDragEnd,
-  onDragStart,
-  ...props
 }: SpinningTextProps) {
   const characters = useMemo(() => {
     const chars = children.split("");
@@ -57,7 +54,6 @@ export function SpinningText({
       }}
       variants={containerVariants}
       animate="animate"
-      {...props}
     >
       {characters.map((char, index) => {
         const angle = charAngle * index;

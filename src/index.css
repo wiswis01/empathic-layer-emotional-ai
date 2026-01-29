@@ -32,6 +32,10 @@
   --bg-hover: rgba(187, 190, 100, 0.12);
   --bg-soft: rgba(142, 85, 114, 0.08);
 
+  /* MagicCard variables */
+  --background: #ffffff;
+  --border: #e5e5e5;
+
   /* Primary Colors - Using Mauve */
   --primary: #8e5572;
   --primary-hover: #7d4a63;

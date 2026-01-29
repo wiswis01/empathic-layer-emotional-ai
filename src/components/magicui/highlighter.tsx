@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { annotate, type RoughAnnotation } from "rough-notation";
+import { annotate } from "rough-notation";
+
+type RoughAnnotation = ReturnType<typeof annotate>;
 
 type AnnotationAction =
   | "highlight"

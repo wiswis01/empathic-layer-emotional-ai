@@ -14,7 +14,9 @@ import { SpinningText } from '@/components/magicui/spinning-text';
 import { Highlighter } from '@/components/magicui/highlighter';
 import { TypingAnimation } from '@/components/magicui/typing-animation';
 import { Pointer } from '@/components/magicui/pointer';
-import { AnimatedList } from '@/components/magicui/animated-list';
+import { Marquee } from '@/components/magicui/marquee';
+import { Particles } from '@/components/ui/particles';
+import { MagicCard } from '@/components/ui/magic-card';
 import gsap from 'gsap';
 import '@/styles/landing.css';
 
@@ -25,24 +27,18 @@ interface LandingPageProps {
 const FEATURES = [
   {
     icon: Camera,
-    title: 'Understands Your Signals',
+    title: 'Understands your signals',
     description: 'Real-time detection of facial expressions and micro-emotions to understand how you truly feel.',
-    bg: '#E3F2FD',
-    size: 'card-large',
   },
   {
     icon: Brain,
-    title: 'Interprets Your Emotions',
+    title: 'Interprets your emotions',
     description: 'Advanced AI analyzes emotional patterns and provides personalized, empathetic responses.',
-    bg: '#E0F7FA',
-    size: '',
   },
   {
     icon: MessageCircle,
-    title: 'Responds With Care',
+    title: 'Responds with care',
     description: 'Thoughtful conversations that adapt to your emotional state in real-time.',
-    bg: '#E8EAF6',
-    size: '',
   },
 ];
 
@@ -110,26 +106,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
   return (
     <div className="landing" ref={containerRef}>
 
-      {/* Brand logo - top left */}
-      <div className="landing-brand">
-        <TypingAnimation duration={150} delay={300} cursorStyle="line">
-          Empath
-        </TypingAnimation>
-      </div>
-
       {/* Subtle gradient orbs */}
       <div className="landing-orb landing-orb--1" />
       <div className="landing-orb landing-orb--2" />
 
-      {/* Spinning text - bottom right */}
+      {/* Particles background */}
+      <Particles
+        className="absolute inset-0"
+        quantity={150}
+        color="#000000"
+        size={0.6}
+        staticity={40}
+        ease={60}
+      />
+
+      {/* Spinning text with brand logo centered inside */}
       <div ref={subtitleRef} className="landing-subtitle-container">
         <SpinningText
           duration={12}
           radius={6}
           className="landing-spinning-text"
         >
-          {`Private • Secure • Empathic • Always with you • `}
+          {`Private • Secure • Caring • Always with you • `}
         </SpinningText>
+        <div className="landing-brand">
+          <TypingAnimation duration={150} delay={300} cursorStyle="line">
+            Empath
+          </TypingAnimation>
+        </div>
       </div>
 
       {/* Main content */}
@@ -144,30 +148,44 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
           </Highlighter>
         </h1>
 
-        {/* Key features - Bento Grid */}
-        <AnimatedList delay={400} className="landing-features-grid" ref={featuresRef}>
-          {FEATURES.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <div
-                key={feature.title}
-                className={`landing-feature-card ${feature.size}`}
-                style={{ backgroundColor: feature.bg }}
-              >
-                <Icon size={28} strokeWidth={1.5} className="landing-feature-icon" />
-                <h3 className="landing-feature-title">{feature.title}</h3>
-                <p className="landing-feature-desc">{feature.description}</p>
-              </div>
-            );
-          })}
-        </AnimatedList>
+        {/* Key features - Double Marquee */}
+        <div className="landing-features-wrapper" ref={featuresRef}>
+          <Marquee pauseOnHover duration={25} gap={20} className="landing-features-marquee">
+            {FEATURES.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <MagicCard key={feature.title} className="landing-feature-card">
+                  <div className="landing-feature-header">
+                    <h3 className="landing-feature-title">{feature.title}</h3>
+                    <Icon size={20} strokeWidth={1.5} className="landing-feature-icon" />
+                  </div>
+                  <p className="landing-feature-desc">{feature.description}</p>
+                </MagicCard>
+              );
+            })}
+          </Marquee>
+          <Marquee pauseOnHover reverse duration={25} gap={20} className="landing-features-marquee">
+            {FEATURES.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <MagicCard key={`${feature.title}-rev`} className="landing-feature-card">
+                  <div className="landing-feature-header">
+                    <h3 className="landing-feature-title">{feature.title}</h3>
+                    <Icon size={20} strokeWidth={1.5} className="landing-feature-icon" />
+                  </div>
+                  <p className="landing-feature-desc">{feature.description}</p>
+                </MagicCard>
+              );
+            })}
+          </Marquee>
+        </div>
 
         {/* CTA */}
         <button ref={ctaRef} onClick={handleEnter} className="landing-cta">
           <Pointer>
             <Heart size={24} fill="#e91e63" color="#e91e63" />
           </Pointer>
-          <span>Start a gentle check-in</span>
+          <span>Start a quick check-in</span>
           <ArrowRight size={20} />
         </button>
 
