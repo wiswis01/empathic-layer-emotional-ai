@@ -28,18 +28,21 @@ const FEATURES = [
     title: 'Understands Your Signals',
     description: 'Real-time detection of facial expressions and micro-emotions to understand how you truly feel.',
     bg: '#E3F2FD',
+    size: 'card-large',
   },
   {
     icon: Brain,
     title: 'Interprets Your Emotions',
     description: 'Advanced AI analyzes emotional patterns and provides personalized, empathetic responses.',
     bg: '#E0F7FA',
+    size: '',
   },
   {
     icon: MessageCircle,
     title: 'Responds With Care',
     description: 'Thoughtful conversations that adapt to your emotional state in real-time.',
     bg: '#E8EAF6',
+    size: '',
   },
 ];
 
@@ -148,7 +151,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
             return (
               <div
                 key={feature.title}
-                className="landing-feature-card"
+                className={`landing-feature-card ${feature.size}`}
                 style={{ backgroundColor: feature.bg }}
               >
                 <Icon size={28} strokeWidth={1.5} className="landing-feature-icon" />
