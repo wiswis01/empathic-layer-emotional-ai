@@ -1,12 +1,10 @@
 /**
- * EmpatheticChat Component - REDESIGNED
+ * EmpatheticChat Component - Landing Page Themed
  *
- * Beautiful white-wash interface matching landing page:
- * - Camera centered as main focus
- * - Smaller chat sidebar
- * - Clean, minimal design
- * - Pre-camera name input
- * - Therapist Dashboard integration
+ * Clean, minimal interface matching landing page:
+ * - Same color palette and particles
+ * - Wide camera view
+ * - Smooth, spacious layout
  */
 
 import React, { useEffect, useCallback, useState, useRef } from 'react';
@@ -19,9 +17,11 @@ import ChatInterface from './ChatInterface';
 import NameInputScreen from './NameInputScreen';
 import { TherapistDashboard } from './TherapistDashboard';
 import { Camera, Stethoscope } from 'lucide-react';
+import { Particles } from '@/components/magicui/particles';
+import { SpinningText } from '@/components/magicui/spinning-text';
+import { TypingAnimation } from '@/components/magicui/typing-animation';
 
 interface EmpatheticChatProps {
-  /** Additional CSS classes */
   className?: string;
 }
 
@@ -39,10 +39,7 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
   const [emotionEnabled, setEmotionEnabled] = useState(true);
   const [therapistMode, setTherapistMode] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const cameraRef = useRef<HTMLDivElement>(null);
-  const chatRef = useRef<HTMLDivElement>(null);
 
-  // Initialize hooks
   const {
     videoRef,
     isActive: isWebcamActive,
@@ -81,20 +78,17 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
     debug: false,
   });
 
-  // Handle name input completion with all question answers
   const handleNameComplete = useCallback((data: UserData) => {
     setUserData(data);
     setShowNameInput(false);
   }, []);
 
-  // Auto-start webcam when main interface shows
   useEffect(() => {
     if (!showNameInput) {
       startWebcam();
     }
   }, [showNameInput, startWebcam]);
 
-  // Start detection when webcam and models are ready
   useEffect(() => {
     if (isWebcamActive && isModelReady && videoRef.current && !isDetecting) {
       startDetection(videoRef.current);
@@ -104,7 +98,6 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
     }
   }, [isWebcamActive, isModelReady, isHandGestureReady, videoRef, isDetecting, isHandGestureDetecting, startDetection, startHandGestureDetection]);
 
-  // Stop detection when webcam stops
   useEffect(() => {
     if (!isWebcamActive && isDetecting) {
       stopDetection();
@@ -114,12 +107,10 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
     }
   }, [isWebcamActive, isDetecting, isHandGestureDetecting, stopDetection, stopHandGestureDetection]);
 
-  // Update context active state
   useEffect(() => {
     setContextActive(emotionEnabled);
   }, [emotionEnabled, setContextActive]);
 
-  // Handle webcam toggle
   const handleWebcamToggle = useCallback(() => {
     if (isWebcamActive) {
       stopWebcam();
@@ -128,7 +119,6 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
     }
   }, [isWebcamActive, startWebcam, stopWebcam]);
 
-  // Show name input screen first
   if (showNameInput) {
     return <NameInputScreen onComplete={handleNameComplete} />;
   }
@@ -147,54 +137,96 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
         overflow: 'hidden',
       }}
     >
-      {/* Subtle gradient orbs for ambiance */}
+      {/* Particles background */}
+      <Particles
+        className="absolute inset-0 pointer-events-none"
+        quantity={80}
+        color="#000000"
+        size={0.4}
+        staticity={60}
+        ease={80}
+      />
+
+      {/* Subtle gradient orbs */}
+      <div
+        style={{
+          position: 'absolute',
+          width: '600px',
+          height: '600px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(135, 206, 250, 0.2) 0%, transparent 70%)',
+          filter: 'blur(100px)',
+          opacity: 0.5,
+          top: '-15%',
+          right: '-10%',
+          pointerEvents: 'none',
+        }}
+      />
       <div
         style={{
           position: 'absolute',
           width: '500px',
           height: '500px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(142, 85, 114, 0.15) 0%, transparent 70%)',
-          filter: 'blur(80px)',
-          opacity: 0.3,
-          top: '-10%',
-          right: '-5%',
-          pointerEvents: 'none',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          width: '400px',
-          height: '400px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(187, 190, 100, 0.12) 0%, transparent 70%)',
-          filter: 'blur(80px)',
-          opacity: 0.3,
-          bottom: '-10%',
-          left: '-5%',
+          background: 'radial-gradient(circle, rgba(249, 224, 227, 0.3) 0%, transparent 70%)',
+          filter: 'blur(100px)',
+          opacity: 0.5,
+          bottom: '-15%',
+          left: '-10%',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Main camera section - CENTERED */}
+      {/* Logo - Top Left */}
       <div
-        ref={cameraRef}
+        style={{
+          position: 'absolute',
+          top: '2rem',
+          left: '2.5rem',
+          width: '120px',
+          height: '120px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10,
+        }}
+      >
+        <SpinningText duration={12} radius={4.5} className="landing-spinning-text" style={{ fontSize: '0.7rem' }}>
+          {`Private • Secure • Caring • `}
+        </SpinningText>
+        <div
+          style={{
+            position: 'absolute',
+            fontFamily: "'Fraunces', Georgia, serif",
+            fontSize: '1.1rem',
+            fontWeight: 500,
+            color: '#1a1a1a',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          <TypingAnimation duration={100} delay={200} cursorStyle="line">
+            Empath
+          </TypingAnimation>
+        </div>
+      </div>
+
+      {/* Main camera section */}
+      <div
         style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '2rem',
+          padding: '1rem 2rem',
           position: 'relative',
         }}
       >
-        {/* Camera controls - top right */}
+        {/* Camera controls - top right of camera area */}
         <div
           style={{
             position: 'absolute',
-            top: '2rem',
+            top: '1.5rem',
             right: '2rem',
             display: 'flex',
             gap: '0.75rem',
@@ -204,76 +236,60 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
           <button
             onClick={handleWebcamToggle}
             style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '50%',
-              background: isWebcamActive
-                ? 'linear-gradient(135deg, #8e5572 0%, #443850 100%)'
-                : 'rgba(142, 85, 114, 0.1)',
-              border: isWebcamActive ? 'none' : '2px solid rgba(142, 85, 114, 0.3)',
-              color: isWebcamActive ? 'white' : '#8e5572',
+              width: '44px',
+              height: '44px',
+              borderRadius: '12px',
+              background: isWebcamActive ? '#87CEFA' : '#F9E0E3',
+              border: 'none',
+              color: isWebcamActive ? '#1a1a1a' : '#A54452',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              transition: 'all 0.3s ease',
               boxShadow: isWebcamActive
-                ? '0 8px 24px rgba(142, 85, 114, 0.3)'
+                ? '0 4px 16px rgba(135, 206, 250, 0.4)'
                 : '0 4px 12px rgba(0, 0, 0, 0.05)',
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
           >
-            <Camera size={20} />
+            <Camera size={18} />
           </button>
 
-          {/* Therapist Mode Toggle */}
           <button
             onClick={() => setTherapistMode(!therapistMode)}
             style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '50%',
-              background: therapistMode
-                ? 'linear-gradient(135deg, #dc2626 0%, #8e5572 100%)'
-                : 'rgba(142, 85, 114, 0.1)',
-              border: therapistMode ? 'none' : '2px solid rgba(142, 85, 114, 0.3)',
-              color: therapistMode ? 'white' : '#8e5572',
+              width: '44px',
+              height: '44px',
+              borderRadius: '12px',
+              background: therapistMode ? '#F1F0F7' : '#FBF2EB',
+              border: 'none',
+              color: therapistMode ? '#7570b3' : '#d95f02',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              transition: 'all 0.3s ease',
               boxShadow: therapistMode
-                ? '0 8px 24px rgba(220, 38, 38, 0.3)'
+                ? '0 4px 16px rgba(117, 112, 179, 0.3)'
                 : '0 4px 12px rgba(0, 0, 0, 0.05)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
             }}
             title={therapistMode ? 'Hide Therapist Dashboard' : 'Show Therapist Dashboard'}
           >
-            <Stethoscope size={20} />
+            <Stethoscope size={18} />
           </button>
         </div>
 
-        {/* Camera feed - large and centered */}
+        {/* Camera feed - wide and spacious */}
         <div
           style={{
             width: '100%',
-            maxWidth: '900px',
+            maxWidth: '1100px',
             aspectRatio: '16/9',
-            borderRadius: '24px',
+            borderRadius: '16px',
             overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
-            background: '#f5f5f5',
+            boxShadow: '0 8px 40px rgba(0, 0, 0, 0.08)',
+            background: '#fafafa',
+            border: '1px solid rgba(0, 0, 0, 0.04)',
           }}
         >
           <WebcamFeed
@@ -291,35 +307,17 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
             className="w-full h-full"
           />
         </div>
-
-        {/* User name display - bottom center */}
-        {userData && (
-          <div
-            style={{
-              marginTop: '1.5rem',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '100px',
-              background: 'rgba(142, 85, 114, 0.1)',
-              border: '1px solid rgba(142, 85, 114, 0.2)',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#8e5572',
-            }}
-          >
-            Welcome, {userData.name}
-          </div>
-        )}
       </div>
 
       {/* Therapist Dashboard Panel */}
       {therapistMode && (
         <div
           style={{
-            width: '420px',
+            width: '380px',
             display: 'flex',
             flexDirection: 'column',
-            borderLeft: '1px solid rgba(0, 0, 0, 0.06)',
-            background: '#f2f7f2',
+            borderLeft: '1px solid rgba(0, 0, 0, 0.04)',
+            background: '#fafafa',
             overflow: 'hidden',
           }}
         >
@@ -331,16 +329,14 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
         </div>
       )}
 
-      {/* Chat sidebar - SMALLER */}
+      {/* Chat sidebar */}
       <div
-        ref={chatRef}
         style={{
-          width: '380px',
+          width: '360px',
           display: 'flex',
           flexDirection: 'column',
-          borderLeft: '1px solid rgba(0, 0, 0, 0.06)',
-          background: 'rgba(255, 255, 255, 0.8)',
-          backdropFilter: 'blur(20px)',
+          borderLeft: '1px solid rgba(0, 0, 0, 0.04)',
+          background: 'rgba(255, 255, 255, 0.95)',
         }}
       >
         <ChatInterface
