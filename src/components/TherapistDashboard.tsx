@@ -971,7 +971,7 @@ const dashboardStyles = `
   }
 
   .suggestion-card.question {
-    border-left-color: #bbbe64;
+    border-left-color: #F5A623;
   }
 
   .suggestion-card.risk {
@@ -988,7 +988,7 @@ const dashboardStyles = `
   }
 
   .suggestion-card.insight {
-    border-left-color: #bbbe64;
+    border-left-color: #F5A623;
   }
 
   .suggestion-card.priority-5 {
@@ -1035,8 +1035,8 @@ const dashboardStyles = `
   }
 
   .suggestion-card.question .suggestion-type-icon {
-    background: rgba(187, 190, 100, 0.15);
-    color: #8a8d3f;
+    background: rgba(245, 166, 35, 0.15);
+    color: #F5A623;
   }
 
   .suggestion-card.pattern .suggestion-type-icon {
