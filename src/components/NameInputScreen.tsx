@@ -15,6 +15,7 @@ import { SpinningText } from '@/components/magicui/spinning-text';
 import { TypingAnimation } from '@/components/magicui/typing-animation';
 import { Particles } from '@/components/magicui/particles';
 import { Highlighter } from '@/components/magicui/highlighter';
+import { CoolMode } from '@/components/magicui/cool-mode';
 
 interface NameInputScreenProps {
   onComplete: (data: {
@@ -311,23 +312,6 @@ export const NameInputScreen: React.FC<NameInputScreenProps> = ({ onComplete }) 
       >
         {step !== 'review' && currentQuestion && (
           <>
-            {/* Icon */}
-            <div
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '20px',
-                background: cardColor,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '2rem',
-                boxShadow: `0 8px 32px ${cardColor}80`,
-              }}
-            >
-              <IconComponent size={28} style={{ color: accentColor }} />
-            </div>
-
             {/* Question */}
             <h1
               style={{
@@ -340,85 +324,139 @@ export const NameInputScreen: React.FC<NameInputScreenProps> = ({ onComplete }) 
                 letterSpacing: '-0.01em',
               }}
             >
-              {currentQuestion.text}{' '}
-              <Highlighter action="highlight" color={currentQuestion.highlightColor || '#87CEFA'}>
-                {currentQuestion.highlightWord}
-              </Highlighter>
+              {currentQuestion.text} {currentQuestion.highlightWord}
             </h1>
 
-            {/* Scale input */}
+            {/* Interactive Scale Slider */}
             {currentQuestion.type === 'scale' && (
-              <div style={{ width: '100%', marginBottom: '2.5rem' }}>
+              <div style={{ width: '100%', maxWidth: '500px', marginBottom: '2.5rem' }}>
+                {/* Slider container */}
                 <div
                   style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '1rem',
+                    position: 'relative',
+                    width: '100%',
+                    height: '56px',
+                    borderRadius: '16px',
+                    background: cardColor,
+                    cursor: 'pointer',
+                    overflow: 'hidden',
+                    boxShadow: `0 4px 20px ${cardColor}80`,
+                  }}
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const percentage = Math.max(0, Math.min(1, x / rect.width));
+                    const value = Math.round(percentage * 9) + 1;
+                    setScaleValue(value);
+                  }}
+                  onMouseMove={(e) => {
+                    if (e.buttons === 1) {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const percentage = Math.max(0, Math.min(1, x / rect.width));
+                      const value = Math.round(percentage * 9) + 1;
+                      setScaleValue(value);
+                    }
                   }}
                 >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setScaleValue(num)}
-                      style={{
-                        width: '44px',
-                        height: '44px',
-                        fontSize: '1rem',
-                        fontWeight: scaleValue === num ? 600 : 400,
-                        color: scaleValue === num ? 'white' : accentColor,
-                        background: scaleValue === num ? accentColor : cardColor,
-                        border: 'none',
-                        borderRadius: '12px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        boxShadow: scaleValue === num ? `0 4px 16px ${accentColor}40` : 'none',
-                      }}
-                    >
-                      {num}
-                    </button>
-                  ))}
+                  {/* Fill bar */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      height: '100%',
+                      width: `${(scaleValue / 10) * 100}%`,
+                      background: `linear-gradient(90deg, ${accentColor}dd 0%, ${accentColor} 100%)`,
+                      borderRadius: '16px',
+                      transition: 'width 0.15s ease-out',
+                      boxShadow: `0 0 20px ${accentColor}40`,
+                    }}
+                  />
+                  {/* Scale markers */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0 12px',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                      <span
+                        key={num}
+                        style={{
+                          fontSize: '0.85rem',
+                          fontWeight: num === scaleValue ? 700 : 400,
+                          color: num <= scaleValue ? 'white' : accentColor,
+                          opacity: num <= scaleValue ? 1 : 0.6,
+                          transition: 'all 0.15s ease',
+                          zIndex: 1,
+                          minWidth: '20px',
+                          textAlign: 'center',
+                        }}
+                      >
+                        {num}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '1rem' }}>
+                {/* Label */}
+                <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '1rem', textAlign: 'center' }}>
                   {scaleValue <= 3 ? 'Not so great' : scaleValue <= 6 ? 'Okay' : scaleValue <= 8 ? 'Pretty good' : 'Great!'}
                 </div>
               </div>
             )}
 
-            {/* Button options */}
+            {/* Button options - Bento Grid style with CoolMode */}
             {currentQuestion.type === 'buttons' && (
               <div
                 style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
                   gap: '0.75rem',
                   marginBottom: '2.5rem',
+                  width: '100%',
+                  maxWidth: '500px',
                 }}
               >
                 {currentQuestion.options?.map((option) => {
                   const isSelected = answers[currentQuestion.id] === option;
                   return (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setAnswers({ ...answers, [currentQuestion.id]: option })}
-                      style={{
-                        padding: '0.875rem 1.25rem',
-                        fontSize: '0.9rem',
-                        fontWeight: isSelected ? 600 : 400,
-                        color: isSelected ? 'white' : '#333',
-                        background: isSelected ? accentColor : cardColor,
-                        border: 'none',
-                        borderRadius: '100px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        boxShadow: isSelected ? `0 4px 16px ${accentColor}40` : 'none',
-                      }}
-                    >
-                      {option}
-                    </button>
+                    <CoolMode key={option} options={{ particleCount: 30, speedUp: 6 }}>
+                      <button
+                        type="button"
+                        onClick={() => setAnswers({ ...answers, [currentQuestion.id]: option })}
+                        style={{
+                          padding: '1rem 0.75rem',
+                          fontSize: '0.85rem',
+                          fontWeight: isSelected ? 600 : 500,
+                          color: isSelected ? '#1a1a1a' : 'white',
+                          background: isSelected ? '#87CEFA' : '#1a1a1a',
+                          border: 'none',
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: isSelected
+                            ? '0 8px 24px rgba(135, 206, 250, 0.4)'
+                            : '0 4px 12px rgba(0, 0, 0, 0.15)',
+                          width: '100%',
+                          minHeight: '56px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                        }}
+                      >
+                        {option}
+                      </button>
+                    </CoolMode>
                   );
                 })}
               </div>
@@ -435,13 +473,13 @@ export const NameInputScreen: React.FC<NameInputScreenProps> = ({ onComplete }) 
                 padding: '1rem 2.5rem',
                 fontSize: '1rem',
                 fontWeight: 600,
-                color: canSubmit() ? '#1a1a1a' : '#999',
-                background: canSubmit() ? '#87CEFA' : 'rgba(0,0,0,0.05)',
+                color: canSubmit() ? 'white' : '#999',
+                background: canSubmit() ? '#1a1a1a' : 'rgba(0,0,0,0.05)',
                 border: 'none',
-                borderRadius: '9px',
+                borderRadius: '12px',
                 cursor: canSubmit() ? 'pointer' : 'not-allowed',
                 transition: 'all 0.3s ease',
-                boxShadow: canSubmit() ? '0 4px 20px rgba(135, 206, 250, 0.4)' : 'none',
+                boxShadow: canSubmit() ? '0 8px 24px rgba(0, 0, 0, 0.2)' : 'none',
               }}
             >
               <span>{currentQuestionIndex < QUESTIONS.length - 1 ? 'Continue' : 'Review'}</span>
@@ -520,13 +558,13 @@ export const NameInputScreen: React.FC<NameInputScreenProps> = ({ onComplete }) 
                 padding: '1rem 2.5rem',
                 fontSize: '1rem',
                 fontWeight: 600,
-                color: '#1a1a1a',
-                background: '#87CEFA',
+                color: 'white',
+                background: '#1a1a1a',
                 border: 'none',
-                borderRadius: '9px',
+                borderRadius: '12px',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
-                boxShadow: '0 4px 20px rgba(135, 206, 250, 0.4)',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
               }}
             >
               <span>Start chatting</span>

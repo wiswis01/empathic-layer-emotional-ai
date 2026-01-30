@@ -97,10 +97,10 @@ const WebcamFeed = forwardRef<HTMLVideoElement, WebcamFeedProps>(
       const landmarks = handGestureResult.landmarks;
       
       // Get actual video dimensions for correct scaling
-      // Landmarks are in pixel coordinates relative to video dimensions (1280x720 by default)
+      // Landmarks are in pixel coordinates relative to video dimensions (960x540 by default)
       // Fallback to expected dimensions if video element not ready
-      const actualVideoWidth = videoWidth || 1280;
-      const actualVideoHeight = videoHeight || 720;
+      const actualVideoWidth = videoWidth || 960;
+      const actualVideoHeight = videoHeight || 540;
       
       // Calculate scaling factors from video dimensions to canvas dimensions
       // Landmarks are already in pixel coordinates relative to video dimensions,
@@ -164,12 +164,12 @@ const WebcamFeed = forwardRef<HTMLVideoElement, WebcamFeedProps>(
     }, [isActive, handGestureResult, mirrored, ref]);
 
     return (
-      <div 
+      <div
         ref={containerRef}
-        className={cn('relative rounded-3xl overflow-hidden shadow-xl transition-all', className)} 
+        className={cn('relative rounded-2xl overflow-hidden shadow-xl transition-all', className)}
         style={{
           background: '#ffffff',
-          border: '1px solid rgba(0, 0, 0, 0.06)'
+          border: '1px solid rgba(0, 0, 0, 0.04)'
         }}
       >
         {/* Video element */}
@@ -194,46 +194,46 @@ const WebcamFeed = forwardRef<HTMLVideoElement, WebcamFeedProps>(
           />
         )}
 
-        {/* Emotion border glow - organic soft glow */}
+        {/* Emotion border glow - subtle */}
         {isActive && latestResult && (
           <div
-            className="absolute inset-0 pointer-events-none transition-all duration-500 rounded-3xl"
+            className="absolute inset-0 pointer-events-none transition-all duration-500 rounded-2xl"
             style={{
-              boxShadow: `inset 0 0 50px ${emotionColor}35, 0 0 40px ${emotionColor}25`,
+              boxShadow: `inset 0 0 40px ${emotionColor}25, 0 0 30px ${emotionColor}15`,
               borderRadius: 'inherit',
             }}
           />
         )}
 
-        {/* Hand gesture info overlay */}
+        {/* Hand gesture info overlay - Onboarding themed */}
         {isActive && handGestureResult?.isDetected && (
           <div className="absolute top-4 left-4 p-3 rounded-2xl backdrop-blur-xl shadow-lg" style={{
-            background: 'linear-gradient(135deg, rgba(68, 56, 80, 0.85) 0%, rgba(142, 85, 114, 0.7) 100%)',
-            border: '1.5px solid rgba(142, 85, 114, 0.5)',
+            background: 'rgba(255, 255, 255, 0.9)',
+            border: '1px solid rgba(0, 0, 0, 0.06)',
             zIndex: 20
           }}>
             {handGestureResult.handSign && (
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mint)' }}>
+                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#666666' }}>
                   Hand:
                 </span>
-                <span className="text-sm font-bold font-display" style={{ color: 'var(--mint)' }}>
+                <span className="text-sm font-bold font-display" style={{ color: '#A54452' }}>
                   {handGestureResult.handSign}
                 </span>
-                <span className="text-xs opacity-75" style={{ color: 'var(--mint)' }}>
+                <span className="text-xs opacity-75" style={{ color: '#666666' }}>
                   ({(handGestureResult.handSignConfidence * 100).toFixed(0)}%)
                 </span>
               </div>
             )}
             {handGestureResult.fingerGesture && (
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--mint)' }}>
+                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#666666' }}>
                   Gesture:
                 </span>
-                <span className="text-sm font-bold font-display" style={{ color: 'var(--mint)' }}>
+                <span className="text-sm font-bold font-display" style={{ color: '#A54452' }}>
                   {handGestureResult.fingerGesture}
                 </span>
-                <span className="text-xs opacity-75" style={{ color: 'var(--mint)' }}>
+                <span className="text-xs opacity-75" style={{ color: '#666666' }}>
                   ({(handGestureResult.fingerGestureConfidence * 100).toFixed(0)}%)
                 </span>
               </div>
@@ -241,10 +241,10 @@ const WebcamFeed = forwardRef<HTMLVideoElement, WebcamFeedProps>(
           </div>
         )}
 
-        {/* Emotion overlay - Artistic & organic */}
+        {/* Emotion overlay - Onboarding themed */}
         {isActive && showOverlay && latestResult && (
           <div className="absolute bottom-0 left-0 right-0 p-5 backdrop-blur-xl" style={{
-            background: 'linear-gradient(to top, rgba(68, 56, 80, 0.85) 0%, rgba(68, 56, 80, 0.6) 60%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 60%, transparent 100%)',
             zIndex: 15
           }}>
             <div className="flex items-center justify-between mb-4">
@@ -257,22 +257,21 @@ const WebcamFeed = forwardRef<HTMLVideoElement, WebcamFeedProps>(
                   }}
                 />
                 <span className="font-display font-semibold text-lg capitalize tracking-wide" style={{
-                  color: 'var(--mint)'
+                  color: '#1a1a1a'
                 }}>
                   {latestResult.dominantEmotion}
                 </span>
               </div>
               <div className="px-4 py-1.5 rounded-full text-xs font-mono font-bold shadow-md" style={{
-                background: 'rgba(142, 85, 114, 0.3)',
-                color: 'var(--mint)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(142, 85, 114, 0.5)'
+                background: '#F9E0E3',
+                color: '#A54452',
+                border: '1px solid rgba(165, 68, 82, 0.2)'
               }}>
                 {(latestResult.confidence * 100).toFixed(0)}%
               </div>
             </div>
 
-            {/* Emotion bars - Organic design */}
+            {/* Emotion bars - Onboarding themed */}
             <div className="grid grid-cols-7 gap-2.5">
               {(Object.entries(latestResult.scores) as [EmotionLabel, number][]).map(
                 ([emotion, score]) => (
@@ -280,8 +279,8 @@ const WebcamFeed = forwardRef<HTMLVideoElement, WebcamFeedProps>(
                     <div
                       className="w-full rounded-full h-2.5 overflow-hidden"
                       style={{
-                        background: 'rgba(68, 56, 80, 0.4)',
-                        border: '1px solid rgba(68, 56, 80, 0.5)'
+                        background: 'rgba(0, 0, 0, 0.06)',
+                        border: '1px solid rgba(0, 0, 0, 0.04)'
                       }}
                       title={`${emotion}: ${(score * 100).toFixed(1)}%`}
                     >
@@ -290,12 +289,12 @@ const WebcamFeed = forwardRef<HTMLVideoElement, WebcamFeedProps>(
                         style={{
                           width: `${score * 100}%`,
                           backgroundColor: EMOTION_COLORS[emotion],
-                          boxShadow: `0 0 12px ${EMOTION_COLORS[emotion]}90, inset 0 0 4px rgba(255,255,255,0.3)`
+                          boxShadow: `0 0 12px ${EMOTION_COLORS[emotion]}60`
                         }}
                       />
                     </div>
                     <span className="text-[10px] font-bold capitalize truncate w-full text-center" style={{
-                      color: 'rgba(242, 247, 242, 0.9)'
+                      color: '#666666'
                     }}>
                       {emotion.slice(0, 3)}
                     </span>

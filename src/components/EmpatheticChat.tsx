@@ -49,8 +49,8 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
     start: startWebcam,
     stop: stopWebcam,
   } = useWebcam({
-    width: 1280,
-    height: 720,
+    width: 960,
+    height: 540,
     frameRate: 30,
   });
 
@@ -147,58 +147,58 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
         ease={80}
       />
 
-      {/* Subtle gradient orbs */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '600px',
-          height: '600px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(135, 206, 250, 0.2) 0%, transparent 70%)',
-          filter: 'blur(100px)',
-          opacity: 0.5,
-          top: '-15%',
-          right: '-10%',
-          pointerEvents: 'none',
-        }}
-      />
+      {/* Subtle gradient orbs - matching onboarding */}
       <div
         style={{
           position: 'absolute',
           width: '500px',
           height: '500px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(249, 224, 227, 0.3) 0%, transparent 70%)',
-          filter: 'blur(100px)',
-          opacity: 0.5,
-          bottom: '-15%',
-          left: '-10%',
+          background: 'radial-gradient(circle, rgba(142, 85, 114, 0.25) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+          opacity: 0.4,
+          top: '-10%',
+          right: '-5%',
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          width: '400px',
+          height: '400px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(187, 190, 100, 0.2) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+          opacity: 0.4,
+          bottom: '-10%',
+          left: '-5%',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Logo - Top Left */}
+      {/* Logo - Top Left - matching onboarding */}
       <div
         style={{
           position: 'absolute',
-          top: '2rem',
-          left: '2.5rem',
-          width: '120px',
-          height: '120px',
+          top: '3rem',
+          left: '3rem',
+          width: '140px',
+          height: '140px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 10,
         }}
       >
-        <SpinningText duration={12} radius={4.5} className="landing-spinning-text" style={{ fontSize: '0.7rem' }}>
-          {`Private • Secure • Caring • `}
+        <SpinningText duration={12} radius={5.5} className="landing-spinning-text">
+          {`Private • Secure • Caring • Always with you • `}
         </SpinningText>
         <div
           style={{
             position: 'absolute',
             fontFamily: "'Fraunces', Georgia, serif",
-            fontSize: '1.1rem',
+            fontSize: '1.3rem',
             fontWeight: 500,
             color: '#1a1a1a',
             letterSpacing: '-0.02em',
@@ -279,17 +279,17 @@ const EmpatheticChat: React.FC<EmpatheticChatProps> = ({ className }) => {
           </button>
         </div>
 
-        {/* Camera feed - wide and spacious */}
+        {/* Camera feed - extra wide */}
         <div
           style={{
             width: '100%',
-            maxWidth: '1100px',
+            maxWidth: '1400px',
             aspectRatio: '16/9',
-            borderRadius: '16px',
+            borderRadius: '20px',
             overflow: 'hidden',
-            boxShadow: '0 8px 40px rgba(0, 0, 0, 0.08)',
+            boxShadow: '0 12px 60px rgba(0, 0, 0, 0.1)',
             background: '#fafafa',
-            border: '1px solid rgba(0, 0, 0, 0.04)',
+            border: '1px solid rgba(0, 0, 0, 0.06)',
           }}
         >
           <WebcamFeed
